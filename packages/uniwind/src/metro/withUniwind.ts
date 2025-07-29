@@ -1,14 +1,13 @@
 import { Scanner } from '@tailwindcss/oxide'
 import chokidar, { FSWatcher } from 'chokidar'
-import fs from 'fs'
 import { MetroConfig } from 'metro-config'
 import path from 'path'
 import { createStylesheets } from './createStylesheets'
 import { DeepMutable, ExtendedBundler, ExtendedFileSystem, Haste, UniwindConfig } from './types'
 
-const virtualDirectory = path.resolve(__dirname, '.cache')
-const virtualFile = 'virtual.js'
-const virtualFilePath = path.join(virtualDirectory, virtualFile)
+const getVirtualPath = (platform: string) => `${platform}.uniwind.js`
+
+const platforms = ['android', 'ios', 'native']
 
 export const withUniwind = (
     config: DeepMutable<MetroConfig>,
@@ -23,7 +22,7 @@ export const withUniwind = (
         haste: null as Haste | null,
         virtualModulesPossible: new Promise<void>(() => void 0),
         globalWatcher: null as FSWatcher | null,
-        virtualJS: '',
+        virtualModules: new Map<string, string>(),
         scanner: new Scanner({
             sources: [
                 {
@@ -34,9 +33,6 @@ export const withUniwind = (
             ],
         }),
     }
-
-    fs.mkdirSync(virtualDirectory, { recursive: true })
-    fs.writeFileSync(virtualFilePath, '')
 
     config.resolver ??= {}
     config.server ??= {}
@@ -59,7 +55,7 @@ export const withUniwind = (
 
         return {
             ...resolved,
-            filePath: virtualFilePath,
+            filePath: getVirtualPath(platform ?? 'native'),
         }
     }
 
@@ -76,16 +72,10 @@ export const withUniwind = (
                 ensureBundlerPatched(bundler)
                 setupGlobalWatcher()
 
-                await recreateStylesheets()
+                await Promise.all(platforms.map(recreateStylesheets))
             })
 
         return middleware
-    }
-
-    config.transformer.getTransformOptions = async (entryPoints, transformOptions, getDependenciesOf) => {
-        await uniwind.virtualModulesPossible
-
-        return uniwind.originalGetTransformOptions?.(entryPoints, transformOptions, getDependenciesOf) ?? {}
     }
 
     const ensureFileSystemPatched = (fs: ExtendedFileSystem) => {
@@ -93,7 +83,7 @@ export const withUniwind = (
             const original_getSha1 = fs.getSha1.bind(fs)
 
             fs.getSha1 = filename => {
-                if (filename === virtualFile) {
+                if (uniwind.virtualModules.has(filename)) {
                     return `${filename}-${Date.now()}`
                 }
 
@@ -117,8 +107,10 @@ export const withUniwind = (
             transformOptions,
             fileBuffer,
         ) => {
-            if (filePath.includes(virtualFile)) {
-                fileBuffer = Buffer.from(uniwind.virtualJS)
+            const virtualJS = uniwind.virtualModules.get(filePath)
+
+            if (virtualJS !== undefined) {
+                fileBuffer = Buffer.from(virtualJS)
             }
 
             return transformFile(filePath, transformOptions, fileBuffer)
@@ -144,32 +136,39 @@ export const withUniwind = (
             persistent: true,
         })
 
-        uniwind.globalWatcher.on('all', event => {
-            if (['change', 'add', 'unlink'].includes(event)) {
-                recreateStylesheets()
+        platforms.forEach(platform => {
+            if (!uniwind.globalWatcher) {
+                return
             }
-        })
 
-        uniwind.globalWatcher.on('raw', () => {
-            recreateStylesheets()
+            uniwind.globalWatcher.on('all', event => {
+                if (['change', 'add', 'unlink'].includes(event)) {
+                    recreateStylesheets(platform)
+                }
+            })
+
+            uniwind.globalWatcher.on('raw', () => {
+                recreateStylesheets(platform)
+            })
         })
     }
 
-    const recreateStylesheets = async () => {
+    const recreateStylesheets = async (platform: string) => {
         if (!uniwind.haste) {
             return
         }
 
         const newJS = await createStylesheets(uniwind.input, uniwind.scanner)
+        const virtualPath = getVirtualPath(platform)
 
-        if (uniwind.virtualJS === newJS) {
+        if (uniwind.virtualModules.get(virtualPath) === newJS) {
             return
         }
 
-        uniwind.virtualJS = newJS
+        uniwind.virtualModules.set(virtualPath, newJS)
         uniwind.haste.emit('change', {
             eventsQueue: [{
-                filePath: virtualFilePath,
+                filePath: virtualPath,
                 metadata: {
                     modifiedTime: Date.now(),
                     size: newJS.length,
