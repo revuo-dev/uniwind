@@ -5,7 +5,7 @@
     "license": "MIT",
     "scripts": {
         "precommit": "bun lint",
-        "build": "node scripts/metro-build.js",
+        "build": "bun scripts/build.js",
         "check:typescript": "tsc --noEmit",
         "lint": "eslint src && dprint check",
         "lint:fix": "eslint src --fix",
@@ -45,6 +45,6 @@
         "@types/postcss-js": "4.0.4",
         "@types/culori": "4.0.0",
         "typescript": "5.8.3",
-        "metro-config": "0.83.1"
+        "metro-config": "0.82.5"
     }
 }

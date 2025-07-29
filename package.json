@@ -5,11 +5,13 @@
         "prepare": "husky",
         "build": "turbo build",
         "check:typescript": "turbo check:typescript",
+        "ios": "turbo ios",
         "lint": "turbo lint",
         "precommit": "turbo precommit"
     },
     "workspaces": [
-        "packages/*"
+        "packages/*",
+        "apps/*"
     ],
     "devDependencies": {
         "typescript": "5.8.3",

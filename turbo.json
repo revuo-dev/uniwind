@@ -4,6 +4,9 @@
         "build": {
             "cache": false
         },
+        "ios": {
+            "cache": false
+        },
         "check:typescript": {},
         "lint": {},
         "precommit": {

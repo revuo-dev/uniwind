@@ -1,6 +1,6 @@
 import { Scanner } from '@tailwindcss/oxide'
 import chokidar, { FSWatcher } from 'chokidar'
-import { MetroConfig } from 'metro-config'
+import type { MetroConfig } from 'metro-config'
 import path from 'path'
 import { createStylesheets } from './createStylesheets'
 import { DeepMutable, ExtendedBundler, ExtendedFileSystem, Haste, UniwindConfig } from './types'

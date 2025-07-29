@@ -46,7 +46,7 @@ export const createStylesheets = async (input: string, scanner: Scanner) => {
     })
     const result = compiler.build(candidates)
     const root = postcss.parse(result)
-    const cssTree = postcssJS.objectify(root)
+    const cssTree = postcssJS.objectify(root as unknown as Parameters<typeof postcssJS.objectify>[0])
     const theme: Record<string, any> = cssTree['@layer theme'][':root, :host']
     const vars: Record<string, string> = Object.fromEntries(
         Object.entries(theme).map(([key, value]) => {
