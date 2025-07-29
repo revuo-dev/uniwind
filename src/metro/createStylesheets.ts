@@ -37,7 +37,7 @@ const parseLineHeight = (value: string, fontSize: number) => {
 }
 
 export const createStylesheets = async (input: string, scanner: Scanner) => {
-    const cssPath = path.join(__dirname, input)
+    const cssPath = path.join(process.cwd(), input)
     const css = fs.readFileSync(cssPath, 'utf8')
     const candidates = scanner.scan()
     const compiler = await compile(css, {

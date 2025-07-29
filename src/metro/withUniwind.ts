@@ -6,9 +6,9 @@ import path from 'path'
 import { createStylesheets } from './createStylesheets'
 import { DeepMutable, ExtendedBundler, ExtendedFileSystem, Haste, UniwindConfig } from './types'
 
-const outputDirectory = path.resolve(__dirname, '.cache')
+const virtualDirectory = path.resolve(__dirname, '.cache')
 const virtualFile = 'virtual.js'
-const virtualFilePath = path.join(outputDirectory, virtualFile)
+const virtualFilePath = path.join(virtualDirectory, virtualFile)
 
 export const withUniwind = (
     config: DeepMutable<MetroConfig>,
@@ -27,7 +27,7 @@ export const withUniwind = (
         scanner: new Scanner({
             sources: [
                 {
-                    base: __dirname,
+                    base: process.cwd(),
                     pattern: '**/*',
                     negated: false,
                 },
@@ -35,7 +35,7 @@ export const withUniwind = (
         }),
     }
 
-    fs.mkdirSync(outputDirectory, { recursive: true })
+    fs.mkdirSync(virtualDirectory, { recursive: true })
     fs.writeFileSync(virtualFilePath, '')
 
     config.resolver ??= {}
@@ -57,10 +57,6 @@ export const withUniwind = (
             return resolved
         }
 
-        uniwind.virtualModulesPossible.then(() => {
-            recreateStylesheets()
-        })
-
         return {
             ...resolved,
             filePath: virtualFilePath,
@@ -72,13 +68,15 @@ export const withUniwind = (
 
         uniwind.virtualModulesPossible = bundler
             .getDependencyGraph()
-            .then(graph => {
+            .then(async graph => {
                 // @ts-expect-error Hidden property
                 uniwind.haste = graph._haste
                 // @ts-expect-error Hidden property
                 ensureFileSystemPatched(graph._fileSystem)
                 ensureBundlerPatched(bundler)
                 setupGlobalWatcher()
+
+                await recreateStylesheets()
             })
 
         return middleware
@@ -135,10 +133,10 @@ export const withUniwind = (
         }
 
         const filesToWatch = [
-            path.join(__dirname, '**/*.ts'),
-            path.join(__dirname, '**/*.tsx'),
-            path.join(__dirname, '**/*.js'),
-            path.join(__dirname, '**/*.jsx'),
+            path.join(process.cwd(), '**/*.ts'),
+            path.join(process.cwd(), '**/*.tsx'),
+            path.join(process.cwd(), '**/*.js'),
+            path.join(process.cwd(), '**/*.jsx'),
         ]
 
         uniwind.globalWatcher = chokidar.watch(filesToWatch, {

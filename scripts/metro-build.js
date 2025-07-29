@@ -3,7 +3,7 @@ import esbuild from 'esbuild'
 esbuild.build({
     entryPoints: ['src/metro/index.ts'],
     bundle: true,
-    outfile: 'dist/metro/index.js',
+    outfile: 'dist/metro/index.cjs',
     platform: 'node',
     format: 'cjs',
     packages: 'external',
