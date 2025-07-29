@@ -110,5 +110,5 @@ export const createStylesheets = async (input: string, scanner: Scanner) => {
         }),
     )
 
-    return `globalThis.__styles__=${JSON.stringify(styles)}`
+    return `globalThis.__uniwind__=${JSON.stringify(styles)}`
 }

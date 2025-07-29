@@ -16,6 +16,7 @@
         "declaration": false,
         "removeComments": false,
         "declarationMap": false,
+        "jsx": "react-jsx",
         "lib": [
             "es2022"
         ]
