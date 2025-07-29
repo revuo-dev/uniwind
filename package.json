@@ -1,50 +1,23 @@
 {
-    "name": "uniwind",
-    "version": "0.0.1",
-    "type": "module",
-    "license": "MIT",
+    "name": "uniwind-monorepo",
+    "private": true,
     "scripts": {
         "prepare": "husky",
-        "precommit": "bun lint",
-        "build": "node scripts/metro-build.js",
-        "check:config": "attw --pack . && publint",
-        "check:typescript": "tsc --noEmit",
-        "lint": "eslint src && dprint check",
-        "lint:fix": "eslint src --fix",
-        "format": "dprint fmt",
-        "prepublishOnly": "bun install && bun run build"
+        "build": "turbo build",
+        "check:typescript": "turbo check:typescript",
+        "lint": "turbo lint",
+        "precommit": "turbo precommit"
     },
-    "style": "./uniwind.css",
-    "exports": {
-        ".": "./uniwind.css",
-        "./metro": "./dist/metro/index.cjs"
-    },
-    "files": [
-        "dist",
-        "metro",
-        "uniwind.css"
+    "workspaces": [
+        "packages/*"
     ],
-    "dependencies": {
-        "@tailwindcss/cli": "4.1.11",
-        "@tailwindcss/node": "4.1.11",
-        "chokidar": "4.0.3",
-        "postcss-js": "4.0.1",
-        "culori": "4.0.2"
-    },
-    "peerDependencies": {
-        "tailwindcss": ">=4",
-        "postcss": ">=8"
-    },
     "devDependencies": {
-        "esbuild": "0.25.8",
-        "@types/postcss-js": "4.0.4",
-        "@types/culori": "4.0.0",
         "typescript": "5.8.3",
-        "metro-config": "0.83.1",
         "dprint": "0.50.1",
-        "@arethetypeswrong/cli": "0.18.2",
         "eslint": "9.32.0",
         "eslint-config-codemask": "2.2.1",
-        "husky": "9.1.7"
-    }
+        "husky": "9.1.7",
+        "turbo": "2.5.5"
+    },
+    "packageManager": "bun@1.2.19"
 }

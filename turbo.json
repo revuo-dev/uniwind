@@ -1,0 +1,13 @@
+{
+    "$schema": "https://turbo.build/schema.json",
+    "tasks": {
+        "build": {
+            "cache": false
+        },
+        "check:typescript": {},
+        "lint": {},
+        "precommit": {
+            "dependsOn": ["lint", "check:typescript"]
+        }
+    }
+}
