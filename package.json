@@ -14,12 +14,14 @@
         "format": "dprint fmt",
         "prepublishOnly": "bun install && bun run build"
     },
+    "style": "./uniwind.css",
     "exports": {
         "./metro": "./dist/metro/index.js"
     },
     "files": [
         "dist",
-        "metro"
+        "metro",
+        "uniwind.css"
     ],
     "dependencies": {
         "@tailwindcss/cli": "4.1.11",
