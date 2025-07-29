@@ -1,4 +1,5 @@
 import esbuild from 'esbuild'
+import fs from 'fs'
 
 const commonOptions = {
     entryPoints: ['src/components/index.ts'],
@@ -6,6 +7,8 @@ const commonOptions = {
     packages: 'external',
     external: ['../package.json'],
 }
+
+fs.rmdirSync('dist', { recursive: true })
 
 Promise.all([
     esbuild.build({
@@ -39,6 +42,17 @@ Promise.all([
                 },
             },
         ],
+    }),
+    esbuild.build({
+        entryPoints: ['./src/babel/index.ts'],
+        outfile: './dist/babel/index.cjs',
+        bundle: true,
+        packages: 'external',
+        external: ['../package.json'],
+        allowOverwrite: true,
+        logLevel: 'warning',
+        platform: 'node',
+        minify: false,
     }),
 ])
     .then(() => console.log('Build completed'))

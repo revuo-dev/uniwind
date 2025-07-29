@@ -45,6 +45,8 @@
         "@types/postcss-js": "4.0.4",
         "@types/culori": "4.0.0",
         "typescript": "5.8.3",
-        "metro-config": "0.82.5"
+        "metro-config": "0.82.5",
+        "@babel/core": "7.28.0",
+        "@babel/types": "7.28.2"
     }
 }
