@@ -23,14 +23,14 @@ const DEFAULT_RN_COMPONENTS = [
     'TouchableWithoutFeedback',
 ]
 
-export default function({ types }: { types: typeof t }): PluginObj {
+export default ({ types }: { types: typeof t }): PluginObj => {
     const componentModule = 'uniwind/components'
     const RN_COMPONENTS = new Set(DEFAULT_RN_COMPONENTS)
 
     return {
         name: 'uniwind',
         visitor: {
-            ImportDeclaration(path: NodePath<ImportDeclaration>) {
+            ImportDeclaration: (path: NodePath<ImportDeclaration>) => {
                 const { node } = path
 
                 if (node.source.value !== 'react-native') {

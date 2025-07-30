@@ -10,7 +10,8 @@
         "lint": "eslint src && dprint check",
         "lint:fix": "eslint src --fix",
         "format": "dprint fmt",
-        "prepublishOnly": "bun install && bun run build"
+        "prepublishOnly": "bun install && bun run build",
+        "circular:check": "dpdm --no-warning --no-tree -T --exit-code circular:1 src/**/*.ts"
     },
     "style": "./uniwind.css",
     "exports": {
@@ -47,6 +48,7 @@
         "typescript": "5.8.3",
         "metro-config": "0.82.5",
         "@babel/core": "7.28.0",
-        "@babel/types": "7.28.2"
+        "@babel/types": "7.28.2",
+        "dpdm": "3.14.0"
     }
 }

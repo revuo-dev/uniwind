@@ -39,3 +39,5 @@ export type DeepMutable<T> = {
 export type UniwindConfig = {
     input?: string
 }
+
+export type Vars = Record<string, string | number>

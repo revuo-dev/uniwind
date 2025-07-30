@@ -1,2 +1,6 @@
 @import 'tailwindcss';
 @import '../../../packages/uniwind';
+
+@theme {
+    --color-primary: oklch(0.72 0.11 178);
+}

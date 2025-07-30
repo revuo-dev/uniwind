@@ -125,6 +125,7 @@ export const withUniwind = (
         }
 
         const filesToWatch = [
+            path.join(process.cwd(), uniwind.input),
             path.join(process.cwd(), '**/*.ts'),
             path.join(process.cwd(), '**/*.tsx'),
             path.join(process.cwd(), '**/*.js'),
@@ -136,18 +137,14 @@ export const withUniwind = (
             persistent: true,
         })
 
-        platforms.forEach(platform => {
-            if (!uniwind.globalWatcher) {
-                return
-            }
-
-            uniwind.globalWatcher.on('all', event => {
-                if (['change', 'add', 'unlink'].includes(event)) {
-                    recreateStylesheets(platform)
-                }
+        uniwind.globalWatcher.on('all', () => {
+            platforms.forEach(platform => {
+                recreateStylesheets(platform)
             })
+        })
 
-            uniwind.globalWatcher.on('raw', () => {
+        uniwind.globalWatcher.on('raw', () => {
+            platforms.forEach(platform => {
                 recreateStylesheets(platform)
             })
         })

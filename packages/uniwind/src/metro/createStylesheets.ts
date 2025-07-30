@@ -1,40 +1,11 @@
 import { compile } from '@tailwindcss/node'
 import { Scanner } from '@tailwindcss/oxide'
-import { converter, formatRgb, parse } from 'culori'
 import fs from 'fs'
 import path from 'path'
 import postcss from 'postcss'
 import postcssJS from 'postcss-js'
-
-const oklchToRgba = (oklchString: string) => {
-    const parsedColor = parse(oklchString)
-
-    if (!parsedColor) {
-        return null
-    }
-
-    if (parsedColor.mode !== 'oklch') {
-        return null
-    }
-
-    const toRgb = converter('rgb')
-    const rgbColor = toRgb(parsedColor)
-
-    return formatRgb(rgbColor)
-}
-
-const parseFontSize = (value: string) => {
-    const remSize = Number(value.replace('rem', ''))
-
-    return remSize * 16
-}
-
-const parseLineHeight = (value: string, fontSize: number) => {
-    // eslint-disable-next-line no-eval
-    const result = (0, eval)(value.replace('calc(', '').replace(')', ''))
-
-    return result * fontSize
-}
+import { Parser } from './parsers'
+import { Vars } from './types'
 
 export const createStylesheets = async (input: string, scanner: Scanner) => {
     const cssPath = path.join(process.cwd(), input)
@@ -48,65 +19,52 @@ export const createStylesheets = async (input: string, scanner: Scanner) => {
     const root = postcss.parse(result)
     const cssTree = postcssJS.objectify(root as unknown as Parameters<typeof postcssJS.objectify>[0])
     const theme: Record<string, any> = cssTree['@layer theme'][':root, :host']
-    const vars: Record<string, string> = Object.fromEntries(
-        Object.entries(theme).map(([key, value]) => {
-            if (typeof value !== 'string') {
-                return [key, value]
-            }
+    const vars = Object.entries(theme).reduce<Vars>((varsAcc, [varName, value]) => {
+        if (typeof value !== 'string') {
+            varsAcc[varName] = value
 
-            if (key.startsWith('--color')) {
-                return [key, oklchToRgba(value)]
-            }
+            return varsAcc
+        }
 
-            if (key.startsWith('--text')) {
-                const fontSizeValue = theme[key.replace('--line-height', '')]
-                const fontSize = parseFontSize(String(fontSizeValue))
+        const varValue = Parser.parse(value, varsAcc)
 
-                return [
-                    key,
-                    key.endsWith('--line-height')
-                        ? parseLineHeight(value, fontSize)
-                        : fontSize,
-                ]
-            }
+        if (varValue === undefined) {
+            return varsAcc
+        }
 
-            return [key, value]
-        }),
-    )
+        if (typeof varValue === 'number' && varName.endsWith('--line-height')) {
+            const fontSize = varsAcc[varName.replace('--line-height', '')] as number
+
+            varsAcc[varName] = fontSize * varValue
+
+            return varsAcc
+        }
+
+        varsAcc[varName] = varValue
+
+        return varsAcc
+    }, {})
     const classes: Record<string, any> = cssTree['@layer utilities']
     const styles = Object.fromEntries(
-        Object.entries(classes).map(([key, value]) => {
-            if (typeof value !== 'object' || value === null) {
-                return [key, value]
-            }
+        Object.entries(classes).map(([classKey, styles]) => {
+            const parsedStyles = Object.entries(styles)
+                .reduce<Record<string, unknown>>((stylesAcc, [styleKey, styleValue]) => {
+                    if (typeof styleValue !== 'string') {
+                        stylesAcc[styleKey] = styleValue
 
-            const parsedStyles = Object.fromEntries(
-                Object.entries(value as object).map(([styleKey, styleValue]) => {
-                    const getStyleValue = () => {
-                        if (typeof styleValue !== 'string') {
-                            return String(styleValue)
-                        }
-
-                        if (styleValue.startsWith('var(')) {
-                            const varKey = styleValue.startsWith('var(--tw-leading')
-                                ? styleValue.replace('var(--tw-leading, var(', '').replace('))', '')
-                                : styleValue.replace('var(', '').replace(')', '')
-                            const varValue = vars[varKey]
-
-                            return varValue
-                        }
-
-                        return styleValue
+                        return stylesAcc
                     }
 
-                    return [
-                        styleKey,
-                        getStyleValue(),
-                    ]
-                }),
-            )
+                    const parsedStyle = Parser.parse(styleValue, vars)
 
-            return [key.replace('.', ''), parsedStyles]
+                    if (parsedStyle !== undefined) {
+                        stylesAcc[styleKey] = parsedStyle
+                    }
+
+                    return stylesAcc
+                }, {})
+
+            return [classKey.replace('.', ''), parsedStyles]
         }),
     )
 

@@ -16,6 +16,7 @@ type UniwindComponentProps = {
 
 export const createUniWindComponent = <T extends React.ComponentType<UniwindComponentProps>>(Component: T) => {
     return (props: React.ComponentProps<T>) => {
+        const globalStyles = getStylesRegistry()
         const classNames = useMemo(() => {
             return props.className?.split(' ')
         }, [props.className])
@@ -25,9 +26,9 @@ export const createUniWindComponent = <T extends React.ComponentType<UniwindComp
             }
 
             return classNames.map(className => {
-                return getStylesRegistry()[className]
+                return globalStyles[className]
             })
-        }, [classNames])
+        }, [classNames, globalStyles])
 
         return (
             // @ts-expect-error Generic component type

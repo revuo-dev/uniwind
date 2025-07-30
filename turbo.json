@@ -9,8 +9,9 @@
         },
         "check:typescript": {},
         "lint": {},
+        "circular:check": {},
         "precommit": {
-            "dependsOn": ["lint", "check:typescript"]
+            "dependsOn": ["lint", "check:typescript", "circular:check"]
         }
     }
 }
