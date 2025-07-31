@@ -4,8 +4,7 @@ import fs from 'fs'
 import path from 'path'
 import postcss from 'postcss'
 import postcssJS from 'postcss-js'
-import { Parser } from './parsers'
-import { Mq } from './parsers/mq'
+import { CSS, Mq, Parser } from './parsers'
 import { StyleAcc, Vars } from './types'
 
 export const createStylesheets = async (input: string, scanner: Scanner) => {
@@ -53,8 +52,8 @@ export const createStylesheets = async (input: string, scanner: Scanner) => {
                     if (styleKey.startsWith('@media') && typeof styleValue === 'object' && styleValue !== null) {
                         const { maxWidth, minWidth, orientation } = Mq.parse(styleKey, vars, Parser)
                         const mediaStyles = Object.entries(styleValue).map(([mqStyleKey, mqStyleValue]) => {
-                            return [mqStyleKey, Parser.parse(mqStyleValue, vars)]
-                        }) as Array<[string, unknown]>
+                            return CSS.toRN(mqStyleKey, Parser.parse(mqStyleValue, vars))
+                        })
 
                         stylesAcc._entries.push(...mediaStyles)
                         stylesAcc.maxWidth = maxWidth
@@ -71,7 +70,7 @@ export const createStylesheets = async (input: string, scanner: Scanner) => {
                     const parsedStyle = Parser.parse(styleValue, vars)
 
                     if (parsedStyle !== undefined) {
-                        stylesAcc._entries.push([styleKey, parsedStyle])
+                        stylesAcc._entries.push(CSS.toRN(styleKey, parsedStyle))
                     }
 
                     return stylesAcc
