@@ -1,11 +1,6 @@
 import { useMemo } from 'react'
-import { StyleProp, ViewStyle } from 'react-native'
-
-type StylesRegistry = Record<string, ViewStyle>
-
-declare global {
-    var __uniwind__: StylesRegistry | undefined
-}
+import { Dimensions, StyleProp, ViewStyle } from 'react-native'
+import { resolveStyles } from './resolveStyles'
 
 const getStylesRegistry = () => globalThis.__uniwind__ ?? {}
 
@@ -30,12 +25,23 @@ export const createUniWindComponent = <T extends React.ComponentType<UniwindComp
             })
         }, [classNames, globalStyles])
 
+        const dimensions = Dimensions.get('window')
+        const windowWidth = dimensions.width
+        const orientation = windowWidth > dimensions.height ? 'landscape' : 'portrait'
+        const resolvedStyles = useMemo(() => {
+            if (!styles) {
+                return undefined
+            }
+
+            return resolveStyles(styles, windowWidth, orientation)
+        }, [styles, windowWidth, orientation])
+
         return (
             // @ts-expect-error Generic component type
             <Component
                 {...props}
                 style={[
-                    styles,
+                    resolvedStyles,
                     props.style,
                 ]}
             />

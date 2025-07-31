@@ -7,8 +7,8 @@ import { Rem } from './rem'
 import { Var } from './var'
 
 export class Parser {
-    static parse(value: string | number, vars: Vars): string | number | undefined {
-        if (typeof value === 'number') {
+    static parse(value: string | number | undefined, vars: Vars): string | number | undefined {
+        if (typeof value === 'number' || value === undefined) {
             return value
         }
 

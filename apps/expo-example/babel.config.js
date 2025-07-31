@@ -6,7 +6,7 @@ module.exports = function(api) {
     return {
         presets: ['babel-preset-expo'],
         plugins: [
-            path.join(__dirname, '../../packages/uniwind/babel'),
+            [path.join(__dirname, '../../packages/uniwind/babel')],
         ],
     }
 }

@@ -5,7 +5,8 @@ import path from 'path'
 import postcss from 'postcss'
 import postcssJS from 'postcss-js'
 import { Parser } from './parsers'
-import { Vars } from './types'
+import { Mq } from './parsers/mq'
+import { StyleAcc, Vars } from './types'
 
 export const createStylesheets = async (input: string, scanner: Scanner) => {
     const cssPath = path.join(process.cwd(), input)
@@ -48,23 +49,35 @@ export const createStylesheets = async (input: string, scanner: Scanner) => {
     const styles = Object.fromEntries(
         Object.entries(classes).map(([classKey, styles]) => {
             const parsedStyles = Object.entries(styles)
-                .reduce<Record<string, unknown>>((stylesAcc, [styleKey, styleValue]) => {
-                    if (typeof styleValue !== 'string') {
-                        stylesAcc[styleKey] = styleValue
+                .reduce<StyleAcc>((stylesAcc, [styleKey, styleValue]) => {
+                    if (styleKey.startsWith('@media') && typeof styleValue === 'object' && styleValue !== null) {
+                        const { maxWidth, minWidth, orientation } = Mq.parse(styleKey, vars, Parser)
+                        const mediaStyles = Object.entries(styleValue).map(([mqStyleKey, mqStyleValue]) => {
+                            return [mqStyleKey, Parser.parse(mqStyleValue, vars)]
+                        }) as Array<[string, unknown]>
 
+                        stylesAcc._entries.push(...mediaStyles)
+                        stylesAcc.maxWidth = maxWidth
+                        stylesAcc.minWidth = minWidth
+                        stylesAcc.orientation = orientation
+
+                        return stylesAcc
+                    }
+
+                    if (typeof styleValue !== 'string' && typeof styleValue !== 'number') {
                         return stylesAcc
                     }
 
                     const parsedStyle = Parser.parse(styleValue, vars)
 
                     if (parsedStyle !== undefined) {
-                        stylesAcc[styleKey] = parsedStyle
+                        stylesAcc._entries.push([styleKey, parsedStyle])
                     }
 
                     return stylesAcc
-                }, {})
+                }, { _entries: [], maxWidth: Number.MAX_VALUE, minWidth: 0, orientation: null })
 
-            return [classKey.replace('.', ''), parsedStyles]
+            return [classKey.replace('.', '').replace(/\\/g, ''), parsedStyles]
         }),
     )
 
