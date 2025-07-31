@@ -8,7 +8,9 @@ const commonOptions = {
     external: ['../package.json'],
 }
 
-fs.rmdirSync('dist', { recursive: true })
+if (fs.existsSync('dist')) {
+    fs.rmdirSync('dist', { recursive: true })
+}
 
 Promise.all([
     esbuild.build({
