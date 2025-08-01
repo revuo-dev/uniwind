@@ -8,7 +8,7 @@ export type Style = {
     orientation: Orientation | null
 }
 
-type StylesRegistry = Record<string, Style>
+export type StyleSheets = Record<string, Style>
 
 export type UniwindRuntime = {
     screenWidth: number
@@ -20,5 +20,6 @@ export type UniwindRuntime = {
 
 declare global {
     var __uniwind__getVars: (runtime: UniwindRuntime) => Record<string, unknown>
-    var __uniwind__computeStylesheet: (runtime: UniwindRuntime, vars: Record<string, unknown>) => StylesRegistry
+    var __uniwind__computeStylesheet: (runtime: UniwindRuntime, vars: Record<string, unknown>) => StyleSheets
+    var __uniwind__hot_reload: () => void
 }

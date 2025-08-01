@@ -23,5 +23,5 @@ export const createStylesheets = async (input: string, scanner: Scanner) => {
     const classes: Record<string, any> = cssTree['@layer utilities']
     const stylesheetTemplate = createStylesheetTemplate(classes)
 
-    return `${varsTemplate};${stylesheetTemplate}`
+    return `${varsTemplate};${stylesheetTemplate};globalThis.__uniwind__hot_reload?.()`
 }

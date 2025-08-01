@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { StyleProp, ViewStyle } from 'react-native'
 import { resolveStyles } from './resolveStyles'
-import { stylesheet } from './stylesheet'
+import { getStyleSheet } from './stylesheet'
 
 type UniwindComponentProps = {
     className?: string
@@ -10,6 +10,7 @@ type UniwindComponentProps = {
 
 export const createUniWindComponent = <T extends React.ComponentType<UniwindComponentProps>>(Component: T) => {
     return (props: React.ComponentProps<T>) => {
+        const stylesheet = getStyleSheet()
         const classNames = useMemo(() => {
             return props.className?.split(' ')
         }, [props.className])
