@@ -5,7 +5,7 @@
     "license": "MIT",
     "scripts": {
         "precommit": "bun lint",
-        "build": "bun scripts/build.js",
+        "build": "unbuild",
         "check:typescript": "tsc --noEmit",
         "lint": "eslint src && dprint check",
         "lint:fix": "eslint src --fix",
@@ -17,11 +17,13 @@
     "exports": {
         ".": "./uniwind.css",
         "./components/*": {
-            "import": "./dist/components/index.mjs",
-            "require": "./dist/components/index.cjs",
-            "default": "./dist/components/index.cjs"
+            "import": "./dist/components/module/index.mjs",
+            "require": "./dist/components/common/index.cjs",
+            "default": "./dist/components/common/index.cjs"
         },
-        "./metro": "./dist/metro/index.cjs"
+        "./babel": "./dist/babel/index.cjs",
+        "./metro": "./dist/metro/index.cjs",
+        "./types": "./types.d.ts"
     },
     "files": [
         "dist",
@@ -42,13 +44,13 @@
         "postcss": ">=8"
     },
     "devDependencies": {
-        "esbuild": "0.25.8",
         "@types/postcss-js": "4.0.4",
         "@types/culori": "4.0.0",
-        "typescript": "5.8.3",
+        "typescript": "5.9.2",
         "metro-config": "0.82.5",
         "@babel/core": "7.28.0",
         "@babel/types": "7.28.2",
-        "dpdm": "3.14.0"
+        "dpdm": "3.14.0",
+        "unbuild": "3.6.0"
     }
 }

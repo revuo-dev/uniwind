@@ -1,1 +1,1 @@
-/// <reference types="../../packages/uniwind/types" />
+/// <reference types="uniwind/types" />

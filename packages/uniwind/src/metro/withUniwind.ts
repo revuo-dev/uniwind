@@ -49,7 +49,7 @@ export const withUniwind = (
         const resolver = uniwind.originalResolveRequest ?? context.resolveRequest
         const resolved = resolver(context, moduleName, platform)
 
-        if (!('filePath' in resolved && resolved.filePath.endsWith(uniwind.input))) {
+        if (!('filePath' in resolved && resolved.filePath.endsWith(uniwind.input)) || platform === 'web') {
             return resolved
         }
 

@@ -1,3 +1,4 @@
 {
-    "main": "../dist/components/index.cjs"
+    "main": "../dist/components/common/index.cjs",
+    "module": "../dist/components/module/index.mjs"
 }

@@ -7,6 +7,15 @@
         "ios": {
             "cache": false
         },
+        "android": {
+            "cache": false
+        },
+        "web": {
+            "cache": false
+        },
+        "start": {
+            "cache": false
+        },
         "check:typescript": {},
         "lint": {},
         "circular:check": {},
