@@ -1,7 +1,8 @@
 export type Orientation = 'portrait' | 'landscape'
+export type ColorScheme = 'light' | 'dark'
 
 export type Style = {
-    _entries: Array<[string, unknown]>
+    entries: Array<[string, unknown]>
     minWidth: number
     maxWidth: number
     orientation: Orientation | null
@@ -9,6 +10,15 @@ export type Style = {
 
 type StylesRegistry = Record<string, Style>
 
+export type UniwindRuntime = {
+    screenWidth: number
+    screenHeight: number
+    orientation: Orientation
+    colorScheme: ColorScheme
+    rem: number
+}
+
 declare global {
-    var __uniwind__: StylesRegistry | undefined
+    var __uniwind__getVars: (runtime: UniwindRuntime) => Record<string, unknown>
+    var __uniwind__computeStylesheet: (runtime: UniwindRuntime, vars: Record<string, unknown>) => StylesRegistry
 }

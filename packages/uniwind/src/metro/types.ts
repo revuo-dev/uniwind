@@ -40,13 +40,4 @@ export type UniwindConfig = {
     input?: string
 }
 
-export type Vars = Record<string, string | number>
-
 export type Orientation = 'portrait' | 'landscape'
-
-export type StyleAcc = {
-    _entries: Array<[string, unknown]>
-    maxWidth: number
-    minWidth: number
-    orientation: Orientation | null
-}

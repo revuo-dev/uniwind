@@ -1,8 +1,7 @@
 import { useMemo } from 'react'
-import { Dimensions, StyleProp, ViewStyle } from 'react-native'
+import { StyleProp, ViewStyle } from 'react-native'
 import { resolveStyles } from './resolveStyles'
-
-const getStylesRegistry = () => globalThis.__uniwind__ ?? {}
+import { stylesheet } from './stylesheet'
 
 type UniwindComponentProps = {
     className?: string
@@ -11,7 +10,6 @@ type UniwindComponentProps = {
 
 export const createUniWindComponent = <T extends React.ComponentType<UniwindComponentProps>>(Component: T) => {
     return (props: React.ComponentProps<T>) => {
-        const globalStyles = getStylesRegistry()
         const classNames = useMemo(() => {
             return props.className?.split(' ')
         }, [props.className])
@@ -21,20 +19,17 @@ export const createUniWindComponent = <T extends React.ComponentType<UniwindComp
             }
 
             return classNames.map(className => {
-                return globalStyles[className]
+                return stylesheet[className]
             })
-        }, [classNames, globalStyles])
+        }, [classNames, stylesheet])
 
-        const dimensions = Dimensions.get('window')
-        const windowWidth = dimensions.width
-        const orientation = windowWidth > dimensions.height ? 'landscape' : 'portrait'
         const resolvedStyles = useMemo(() => {
             if (!styles) {
                 return undefined
             }
 
-            return resolveStyles(styles, windowWidth, orientation)
-        }, [styles, windowWidth, orientation])
+            return resolveStyles(styles)
+        }, [styles])
 
         return (
             // @ts-expect-error Generic component type
