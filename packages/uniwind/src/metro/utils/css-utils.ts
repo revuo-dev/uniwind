@@ -53,6 +53,13 @@ const cssToRNValueMap = {
 
         return value
     },
+    opacity: (value: string) => {
+        if (value.endsWith('%')) {
+            return parseFloat(value.slice(0, -1)) / 100
+        }
+
+        return value
+    },
 } as Record<string, (value: any) => any>
 
 export const cssToRN = (property: string, value: any) => {
