@@ -4,7 +4,7 @@ import { copyComponentProperties } from '../../utils'
 import { RNClassNameProps, RNStylesProps, UniwindComponentProps } from '../props'
 
 type TailwindRNStyle = {
-    $$cssTrue: true
+    $$css: true
     tailwind: string | undefined
 }
 
@@ -25,7 +25,7 @@ export const createUniwindComponent = (
                 {...additionalStyles?.reduce<AdditionalClasses>((acc, styleProp) => {
                     acc[styleProp] = [
                         {
-                            $$cssTrue: true,
+                            $$css: true,
                             tailwind: props[styleProp.replace('Style', 'ClassName') as RNClassNameProps],
                         },
                         props[styleProp],

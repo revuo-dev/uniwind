@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from 'react'
+import React, { useCallback, useMemo, useSyncExternalStore } from 'react'
 import { RNStylesProps, UniwindComponentProps } from '../props'
 import { UniwindStore } from './store'
 
@@ -7,9 +7,12 @@ export const createUniwindComponent = (
     additionalStyles?: Array<RNStylesProps>,
 ) => {
     return (props: UniwindComponentProps) => {
+        const snapshot = useMemo(() => {
+            return UniwindStore.getSnapshot(props, additionalStyles)
+        }, [props])
         const uniwindState = useSyncExternalStore(
-            subscribe => UniwindStore.subscribe(subscribe),
-            () => UniwindStore.getSnapshot(props, additionalStyles),
+            useCallback(subscribe => UniwindStore.subscribe(subscribe), []),
+            () => snapshot,
         )
 
         return (

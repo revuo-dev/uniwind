@@ -17,9 +17,9 @@
     "exports": {
         ".": "./uniwind.css",
         "./components/*": {
-            "import": "./dist/components/module/index.mjs",
-            "require": "./dist/components/common/index.cjs",
-            "default": "./dist/components/common/index.cjs"
+            "import": "./dist/components/module/index.js",
+            "require": "./dist/components/common/index.js",
+            "default": "./dist/components/common/index.js"
         },
         "./babel": "./dist/babel/index.cjs",
         "./metro": "./dist/metro/index.cjs",

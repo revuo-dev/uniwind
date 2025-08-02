@@ -1,16 +1,21 @@
 import { UniwindRuntime } from '../../runtime'
+import { StyleSheets } from '../../types'
 import { RNClassNameProps, RNStyle, RNStylesProps, UniwindComponentProps } from '../props'
 import { resolveStyles } from './resolveStyles'
 
 export class UniwindStoreBuilder {
-    vars = globalThis.__uniwind__getVars(UniwindRuntime)
-    stylesheets = globalThis.__uniwind__computeStylesheet(UniwindRuntime, this.vars)
+    vars = {} as Record<string, unknown>
+    stylesheets = {} as StyleSheets
     listeners = new Set<() => void>()
     styleCache = new Map<string, RNStyle>()
-
-    constructor() {}
+    initialized = false
 
     subscribe(onStoreChange: () => void) {
+        if (!this.initialized) {
+            this.initialized = true
+            this.reload()
+        }
+
         const listener = () => {
             onStoreChange()
         }
@@ -43,8 +48,10 @@ export class UniwindStoreBuilder {
                     props.style,
                 ],
                 ...additionalStyles?.reduce((acc, styleProp) => {
+                    const className = props[styleProp.replace('Style', 'ClassName') as RNClassNameProps] ?? ''
+
                     acc[styleProp] = [
-                        this.getStyles(props[styleProp.replace('Style', 'ClassName') as RNClassNameProps] ?? ''),
+                        this.getStyles(className),
                         props[styleProp],
                     ]
 
