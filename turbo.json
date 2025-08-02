@@ -1,5 +1,6 @@
 {
     "$schema": "https://turbo.build/schema.json",
+    "ui": "tui",
     "tasks": {
         "build": {
             "cache": false
@@ -14,7 +15,8 @@
             "cache": false
         },
         "start": {
-            "cache": false
+            "cache": false,
+            "interactive": true
         },
         "check:typescript": {},
         "lint": {},

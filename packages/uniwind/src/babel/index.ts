@@ -37,6 +37,16 @@ export default ({ types }: { types: typeof t }): PluginObj => {
                     return
                 }
 
+                const hasSomeComponent = node.specifiers.some(spec =>
+                    types.isImportSpecifier(spec)
+                    && types.isIdentifier(spec.imported)
+                    && DEFAULT_RN_COMPONENTS.includes(spec.imported.name)
+                )
+
+                if (!hasSomeComponent) {
+                    return
+                }
+
                 const componentSpecifiers: Array<ImportSpecifier> = []
                 const nonComponentSpecifiers: Array<
                     | t.ImportSpecifier
@@ -73,7 +83,7 @@ export default ({ types }: { types: typeof t }): PluginObj => {
 
                 if (nonComponentSpecifiers.length > 0) {
                     const nonComponentImport = types.importDeclaration(
-                        nonComponentSpecifiers,
+                        nonComponentSpecifiers.map(s => types.cloneNode(s)),
                         types.stringLiteral('react-native'),
                     )
                     newImports.push(nonComponentImport)
