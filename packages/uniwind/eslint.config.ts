@@ -14,6 +14,6 @@ export default [
         },
     },
     {
-        ignores: ['eslint.config.ts', 'scripts/**.*'],
+        ignores: ['eslint.config.ts', 'scripts/**.*', 'build.config.ts'],
     },
 ]

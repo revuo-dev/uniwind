@@ -7,7 +7,7 @@ import postcssJS from 'postcss-js'
 import { createStylesheetTemplate } from './createStylesheetTemplate'
 import { createVarsTemplate } from './createVarsTemplate'
 
-export const createStylesheets = async (input: string, scanner: Scanner) => {
+export const compileVirtualJS = async (input: string, scanner: Scanner) => {
     const cssPath = path.join(process.cwd(), input)
     const css = fs.readFileSync(cssPath, 'utf8')
     const candidates = scanner.scan()

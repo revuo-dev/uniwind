@@ -2,7 +2,7 @@ import { Scanner } from '@tailwindcss/oxide'
 import chokidar, { FSWatcher } from 'chokidar'
 import type { MetroConfig } from 'metro-config'
 import path from 'path'
-import { createStylesheets } from './createStylesheets'
+import { compileVirtualJS } from './compileVirtualJS'
 import { DeepMutable, ExtendedBundler, ExtendedFileSystem, Haste, UniwindConfig } from './types'
 
 const getVirtualPath = (platform: string) => `${platform}.uniwind.js`
@@ -155,7 +155,7 @@ export const withUniwind = (
             return
         }
 
-        const newJS = await createStylesheets(uniwind.input, uniwind.scanner)
+        const newJS = await compileVirtualJS(uniwind.input, uniwind.scanner)
         const virtualPath = getVirtualPath(platform)
 
         if (uniwind.virtualModules.get(virtualPath) === newJS) {
