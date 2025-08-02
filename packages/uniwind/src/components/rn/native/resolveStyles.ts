@@ -1,5 +1,5 @@
-import { UniwindRuntime } from './runtime'
-import { Style } from './types'
+import { UniwindRuntime } from '../../runtime'
+import { Style } from '../../types'
 
 export const resolveStyles = (styles: Array<Style | undefined>) => {
     const result = {} as Record<string, unknown>
