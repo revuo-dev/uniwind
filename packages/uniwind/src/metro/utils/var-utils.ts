@@ -94,3 +94,31 @@ export const processVar = (rawValue: string): Array<string> => {
 
     return [toVar(value), ...defaultValue]
 }
+
+export const injectLocalVars = (entries: Array<[string, unknown]>) => {
+    const localVars = Object.fromEntries(entries.filter(([key]) => key.startsWith('--')))
+
+    return entries.reduce<Array<[string, unknown]>>((acc, [key, value]) => {
+        if (key.startsWith('--')) {
+            return acc
+        }
+
+        if (typeof value !== 'string') {
+            acc.push([key, value])
+
+            return acc
+        }
+
+        const processedValue = value.replace(/vars\[`(.*?)`\]/g, (match, varName) => {
+            if (varName in localVars) {
+                return String(localVars[varName])
+            }
+
+            return match
+        })
+
+        acc.push([key, processedValue])
+
+        return acc
+    }, [])
+}
