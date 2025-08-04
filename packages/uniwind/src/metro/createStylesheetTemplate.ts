@@ -1,12 +1,5 @@
-import { Orientation } from './types'
-import { cssToRN, escapeDynamic, processCSSValue, processMediaQuery } from './utils'
-
-type StyleTemplateAcc = {
-    entries: Array<[string, unknown]>
-    maxWidth: string | number
-    minWidth: string | number
-    orientation: Orientation | null
-}
+import { StyleTemplateAcc } from './types'
+import { cssToRN, escapeDynamic, injectLocalVars, processCSSValue, processMediaQuery } from './utils'
 
 export const createStylesheetTemplate = (classes: Record<string, any>) => {
     const template = Object.fromEntries(
@@ -53,7 +46,18 @@ export const createStylesheetTemplate = (classes: Record<string, any>) => {
             ]
         }),
     )
-    const stringifiedTemplate = escapeDynamic(JSON.stringify(template))
+    const processedTemplate = Object.fromEntries(
+        Object.entries(template).map(([className, styles]) => {
+            return [
+                className,
+                {
+                    ...styles,
+                    entries: injectLocalVars(styles.entries),
+                },
+            ]
+        }),
+    )
+    const stringifiedTemplate = escapeDynamic(JSON.stringify(processedTemplate))
 
     return `globalThis.__uniwind__computeStylesheet = (rt, vars) => (${stringifiedTemplate})`
 }

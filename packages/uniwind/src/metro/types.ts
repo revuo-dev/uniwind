@@ -41,3 +41,10 @@ export type UniwindConfig = {
 }
 
 export type Orientation = 'portrait' | 'landscape'
+
+export type StyleTemplateAcc = {
+    entries: Array<[string, unknown]>
+    maxWidth: string | number
+    minWidth: string | number
+    orientation: Orientation | null
+}
