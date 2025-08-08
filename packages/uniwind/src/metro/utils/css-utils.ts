@@ -5,9 +5,9 @@ export const processCSSValue = (value: string) => {
         .replace(/(\d+(?:\.\d+)?)(vw|vh|px|rem)/g, (match, value, unit) => {
             switch (unit) {
                 case 'vw':
-                    return `(${value} * rt.screenWidth / 100)`
+                    return `(${value} * rt.screen.width / 100)`
                 case 'vh':
-                    return `(${value} * rt.screenHeight / 100)`
+                    return `(${value} * rt.screen.height / 100)`
                 case 'px':
                     return value
                 case 'rem':

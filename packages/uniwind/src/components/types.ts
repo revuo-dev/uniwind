@@ -11,8 +11,10 @@ export type Style = {
 export type StyleSheets = Record<string, Style>
 
 export type UniwindRuntime = {
-    screenWidth: number
-    screenHeight: number
+    screen: {
+        width: number
+        height: number
+    }
     orientation: Orientation
     colorScheme: ColorScheme
     rem: number
