@@ -1,10 +1,7 @@
-import { converter, formatRgb, parse } from 'culori'
 import { pipe } from '../utils'
 import type { ProcessorBuilder } from './processor'
 
 export class CSS {
-    toRgb = converter('rgb')
-
     constructor(readonly Processor: ProcessorBuilder) {}
 
     processCSSValue(value: string, key?: string): unknown {
@@ -12,10 +9,12 @@ export class CSS {
             return this.Processor.Shadow.processShadow(value)
         }
 
-        const parsedColor = parse(value)
+        if (this.Processor.Color.isColor(value)) {
+            return this.Processor.Color.processColor(value)
+        }
 
-        if (parsedColor !== undefined) {
-            return formatRgb(this.toRgb(parsedColor))
+        if (this.Processor.Color.isColorMix(value)) {
+            return this.Processor.Color.processColorMix(value)
         }
 
         return pipe(value)(
