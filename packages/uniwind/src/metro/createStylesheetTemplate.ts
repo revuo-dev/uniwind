@@ -7,11 +7,11 @@ export const createStylesheetTemplate = (classes: Record<string, any>, vars: Rec
     const template = Object.fromEntries(
         Object.entries(classes).map(([className, styles]) => {
             const parsedStyles = Object.entries(styles).reduce<StyleTemplateAcc>((stylesAcc, [styleKey, styleValue]) => {
-                const { orientation, colorScheme, dir } = Processor.MQ.extractResolvers(className)
+                const { orientation, colorScheme, rtl } = Processor.MQ.extractResolvers(className)
 
                 stylesAcc.orientation = orientation
                 stylesAcc.colorScheme = colorScheme
-                stylesAcc.dir = dir
+                stylesAcc.rtl = rtl
 
                 if (typeof styleValue === 'object' && styleValue !== null) {
                     const { maxWidth, minWidth } = Processor.MQ.processMediaQuery(styleKey)
@@ -35,7 +35,7 @@ export const createStylesheetTemplate = (classes: Record<string, any>, vars: Rec
                 minWidth: 0,
                 orientation: null,
                 colorScheme: null,
-                dir: null,
+                rtl: null,
             })
 
             return [
@@ -114,7 +114,7 @@ export const createStylesheetTemplate = (classes: Record<string, any>, vars: Rec
                 })
             }
 
-            if (styles.dir !== null) {
+            if (styles.rtl !== null) {
                 dependencies.push(StyleDependency.Rtl)
             }
 

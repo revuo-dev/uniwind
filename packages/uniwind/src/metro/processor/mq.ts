@@ -1,4 +1,4 @@
-import { ColorScheme, Orientation, WritingDirection } from '../../types'
+import { ColorScheme, Orientation } from '../../types'
 import { isDefined } from '../utils'
 import type { ProcessorBuilder } from './processor'
 
@@ -16,9 +16,9 @@ export class MQ {
             colorScheme: this.getFromClassName(lower, {
                 dark: ColorScheme.Dark,
             }) ?? ColorScheme.Light,
-            dir: this.getFromClassName(lower, {
-                ltr: WritingDirection.Ltr,
-                rtl: WritingDirection.Rtl,
+            rtl: this.getFromClassName(lower, {
+                ltr: false,
+                rtl: true,
             }),
         }
     }

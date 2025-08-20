@@ -72,7 +72,7 @@ export class UniwindStoreBuilder {
                 if (
                     this.runtime.orientation === style.orientation
                     || this.runtime.colorScheme === style.colorScheme
-                    || this.runtime.dir === style.dir
+                    || this.runtime.rtl === style.rtl
                 ) {
                     if (style.stylesUsingVariables[property] !== undefined) {
                         stylesUsingVariables.push([property, style.stylesUsingVariables[property]])

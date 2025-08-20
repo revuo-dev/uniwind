@@ -1,5 +1,5 @@
 import type Bundler from 'metro/private/Bundler'
-import { ColorScheme, Orientation, WritingDirection } from '../types'
+import { ColorScheme, Orientation } from '../types'
 
 type HasteEventMetadata = {
     modifiedTime: number
@@ -47,5 +47,5 @@ export type StyleTemplateAcc = {
     minWidth: string | number
     orientation: Orientation | null
     colorScheme: ColorScheme | null
-    dir: WritingDirection | null
+    rtl: boolean | null
 }
