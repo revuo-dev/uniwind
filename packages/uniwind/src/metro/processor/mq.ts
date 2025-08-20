@@ -15,7 +15,7 @@ export class MQ {
             }),
             colorScheme: this.getFromClassName(lower, {
                 dark: ColorScheme.Dark,
-            }) ?? ColorScheme.Light,
+            }),
             rtl: this.getFromClassName(lower, {
                 ltr: false,
                 rtl: true,
