@@ -39,7 +39,7 @@ export const createVarsTemplate = (theme: Record<string, any>) => {
                 ? 'undefined'
                 : escapeDynamic(JSON.stringify(value))
 
-            if (stringifiedValue.includes('vars[')) {
+            if (stringifiedValue.includes('this[')) {
                 return `${acc}get "${key}"() { return ${stringifiedValue} },`
             }
 

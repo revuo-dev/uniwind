@@ -42,7 +42,7 @@ export class CSS {
                         return match
                 }
             }),
-            x => x.replace('currentcolor', `(this.vars['currentColor'])`),
+            x => x.replace('currentcolor', `(this['currentColor'])`),
             // Convert *Number* / *Number* to (*Number* / *Number*) so it can be evaluated
             x => /\d+\s*\/\s*\d+/.test(x) ? `(${x})` : x,
             // Convert *Number* to (*Number*) so it can be evaluated

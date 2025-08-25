@@ -91,8 +91,8 @@ export class UniwindStoreBuilder {
             const originalVars = [] as Array<[string, PropertyDescriptor | undefined]>
 
             inlineVariables.forEach(([varName, varValue]) => {
-                originalVars.push([varName, Object.getOwnPropertyDescriptor(this.stylesheets.vars, varName)])
-                Object.defineProperty(this.stylesheets.vars, varName, {
+                originalVars.push([varName, Object.getOwnPropertyDescriptor(this.stylesheets, varName)])
+                Object.defineProperty(this.stylesheets, varName, {
                     get: varValue,
                 })
             })
@@ -103,7 +103,7 @@ export class UniwindStoreBuilder {
             })
 
             originalVars.forEach(([varName, descriptor]) => {
-                descriptor && Object.defineProperty(this.stylesheets.vars, varName, descriptor)
+                descriptor && Object.defineProperty(this.stylesheets, varName, descriptor)
             })
         }
 

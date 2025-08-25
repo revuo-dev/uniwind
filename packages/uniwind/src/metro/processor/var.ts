@@ -5,7 +5,7 @@ export class Var {
     constructor(readonly Processor: ProcessorBuilder) {}
 
     toVar(value: string) {
-        return `this.vars[${toSafeString(value)}]`
+        return `this[${toSafeString(value)}]`
     }
 
     findMatch(

@@ -34,5 +34,5 @@ export const compileVirtualJS = async (input: string, scanner: Scanner) => {
     const hotReloadFN = 'globalThis.__uniwind__hot_reload?.()'
     const currentColor = `get currentColor() { return rt.colorScheme === 'dark' ? '#ffffff' : '#000000' },`
 
-    return `globalThis.__uniwind__computeStylesheet = rt => ({ vars: { ${currentColor} ${varsTemplate} }, ${stylesheetTemplate} });${hotReloadFN}`
+    return `globalThis.__uniwind__computeStylesheet = rt => ({ ${currentColor} ${varsTemplate} ${stylesheetTemplate} });${hotReloadFN}`
 }

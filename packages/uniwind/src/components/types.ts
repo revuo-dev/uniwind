@@ -12,9 +12,7 @@ export type Style = {
     dependencies: Array<StyleDependency>
 }
 
-export type StyleSheets = {
-    vars: Record<string, unknown>
-} & Record<string, Style>
+export type StyleSheets = Record<string, Style>
 
 export type UniwindRuntime = {
     screen: {

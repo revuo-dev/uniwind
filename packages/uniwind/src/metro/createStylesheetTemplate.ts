@@ -79,7 +79,7 @@ export const createStylesheetTemplate = (classes: Record<string, any>, vars: Rec
 
                     const stringifiedValue = JSON.stringify(value)
 
-                    if (stringifiedValue.includes('vars[')) {
+                    if (stringifiedValue.includes('this[')) {
                         stylesUsingVariables[key] = className
                     }
 
@@ -102,13 +102,13 @@ export const createStylesheetTemplate = (classes: Record<string, any>, vars: Rec
                 dependencies.push(StyleDependency.ColorScheme)
             }
 
-            const varsRegex = /this\.vars\[`([^`]+)`\]/g
+            const varsRegex = /this\[`([^`]+)`\]/g
             const varsMatches = stringifiedEntries.match(varsRegex)
 
             if (varsMatches) {
                 varsMatches.forEach(match => {
-                    // Remove `this.vars[` and `]`
-                    const varName = match.slice(11, -2)
+                    // Remove `this[` and `]`
+                    const varName = match.slice(6, -2)
 
                     if (varName in vars) {
                         const varValue = vars[varName]
@@ -155,7 +155,7 @@ export const createStylesheetTemplate = (classes: Record<string, any>, vars: Rec
 
             return `${acc}"${key}":${escapeDynamic(JSON.stringify(value))},`
         }, '')
-        const isComputed = JSON.stringify(style).includes('vars[')
+        const isComputed = JSON.stringify(style).includes('this[')
 
         if (isComputed) {
             return `${acc}get "${className}"() { return { ${stringifiedValue} } },`

@@ -40,11 +40,21 @@ const cssToRNMap: Record<string, (value: any) => unknown> = {
     transform: (value: string) => {
         const transforms = value.split(' ')
         const getTransform = (transformName: string) =>
-            transforms
-                .find(transform => transform.startsWith(transformName))
-                ?.replace(transformName, '')
-                .replace('(', '')
-                .replace(')', '')
+            pipe(transforms)(
+                x => x.find(transform => transform.startsWith(transformName)),
+                x => x?.replace(transformName, ''),
+                x => x?.replace('(', ''),
+                x => x?.replace(')', ''),
+                x => {
+                    if (x === undefined) {
+                        return undefined
+                    }
+
+                    const isNumber = !isNaN(Number(x))
+
+                    return isNumber ? `(${x})` : x
+                },
+            )
 
         const possibleTransforms = {
             perspective: getTransform('perspective'),
@@ -131,7 +141,7 @@ const cssToRNMap: Record<string, (value: any) => unknown> = {
     },
     boxShadow: (value: string) => {
         return {
-            boxShadow: value.match(/this\.vars\[`(.*?)`\]/g) ?? [],
+            boxShadow: value.match(/this\[`(.*?)`\]/g) ?? [],
         }
     },
 }
