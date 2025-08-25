@@ -80,7 +80,7 @@ export class UniwindStoreBuilder {
                     }
 
                     result[property] = value
-                    bestBreakpoints[property] = style.colorScheme !== null || style.orientation !== null || style.rtl !== null
+                    bestBreakpoints[property] = style.colorScheme !== null || style.orientation !== null || style.rtl !== null || style.native
                         ? Infinity
                         : style.minWidth
                 }

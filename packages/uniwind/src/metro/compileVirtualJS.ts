@@ -6,8 +6,9 @@ import postcss from 'postcss'
 import postcssJS from 'postcss-js'
 import { createStylesheetTemplate } from './createStylesheetTemplate'
 import { createVarsTemplate } from './createVarsTemplate'
+import { Platform } from './types'
 
-export const compileVirtualJS = async (input: string, scanner: Scanner) => {
+export const compileVirtualJS = async (input: string, scanner: Scanner, platform: Platform) => {
     const cssPath = path.join(process.cwd(), input)
     const css = fs.readFileSync(cssPath, 'utf8')
     const candidates = scanner.scan()
@@ -30,7 +31,7 @@ export const compileVirtualJS = async (input: string, scanner: Scanner) => {
     )
     const { vars, varsTemplate } = createVarsTemplate({ ...theme, ...properties })
     const classes: Record<string, any> = cssTree['@layer utilities']
-    const stylesheetTemplate = createStylesheetTemplate(classes, vars)
+    const stylesheetTemplate = createStylesheetTemplate(classes, vars, platform)
     const hotReloadFN = 'globalThis.__uniwind__hot_reload?.()'
     const currentColor = `get currentColor() { return rt.colorScheme === 'dark' ? '#ffffff' : '#000000' },`
 

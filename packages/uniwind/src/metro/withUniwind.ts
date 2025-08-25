@@ -3,11 +3,11 @@ import chokidar, { FSWatcher } from 'chokidar'
 import type { MetroConfig } from 'metro-config'
 import path from 'path'
 import { compileVirtualJS } from './compileVirtualJS'
-import { DeepMutable, ExtendedBundler, ExtendedFileSystem, Haste, UniwindConfig } from './types'
+import { DeepMutable, ExtendedBundler, ExtendedFileSystem, Haste, Platform, UniwindConfig } from './types'
 
 const getVirtualPath = (platform: string) => `${platform}.uniwind.js`
 
-const platforms = ['android', 'ios', 'native']
+const platforms = [Platform.Android, Platform.iOS]
 
 export const withUniwind = (
     config: DeepMutable<MetroConfig>,
@@ -49,13 +49,17 @@ export const withUniwind = (
         const resolver = uniwind.originalResolveRequest ?? context.resolveRequest
         const resolved = resolver(context, moduleName, platform)
 
-        if (!('filePath' in resolved && resolved.filePath.endsWith(uniwind.input)) || platform === 'web') {
+        if (!('filePath' in resolved && resolved.filePath.endsWith(uniwind.input)) || platform === Platform.Web) {
+            return resolved
+        }
+
+        if (platform !== Platform.iOS && platform !== Platform.Android) {
             return resolved
         }
 
         return {
             ...resolved,
-            filePath: getVirtualPath(platform ?? 'native'),
+            filePath: getVirtualPath(platform),
         }
     }
 
@@ -150,12 +154,12 @@ export const withUniwind = (
         })
     }
 
-    const recreateStylesheets = async (platform: string) => {
+    const recreateStylesheets = async (platform: Platform) => {
         if (!uniwind.haste) {
             return
         }
 
-        const newJS = await compileVirtualJS(uniwind.input, uniwind.scanner)
+        const newJS = await compileVirtualJS(uniwind.input, uniwind.scanner, platform)
         const virtualPath = getVirtualPath(platform)
 
         if (uniwind.virtualModules.get(virtualPath) === newJS) {

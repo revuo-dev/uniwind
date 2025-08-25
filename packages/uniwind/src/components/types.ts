@@ -10,6 +10,7 @@ export type Style = {
     colorScheme: ColorScheme | null
     rtl: boolean | null
     dependencies: Array<StyleDependency>
+    native: boolean
 }
 
 export type StyleSheets = Record<string, Style>

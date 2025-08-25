@@ -1,18 +1,18 @@
 import { StyleDependency } from '../types'
 import { Processor } from './processor'
-import { StyleTemplateAcc } from './types'
+import { Platform, StyleTemplateAcc } from './types'
 import { escapeDynamic, isDefined, pipe } from './utils'
 
-export const createStylesheetTemplate = (classes: Record<string, any>, vars: Record<string, any>) => {
+export const createStylesheetTemplate = (classes: Record<string, any>, vars: Record<string, any>, forPlatform: Platform) => {
     const template = Object.fromEntries(
         Object.entries(classes).map(([className, styles]) => {
+            const { orientation, colorScheme, rtl, platform } = Processor.MQ.extractResolvers(className)
+
+            if (platform && platform !== Platform.Native && platform !== forPlatform) {
+                return null
+            }
+
             const parsedStyles = Object.entries(styles).reduce<StyleTemplateAcc>((stylesAcc, [styleKey, styleValue]) => {
-                const { orientation, colorScheme, rtl } = Processor.MQ.extractResolvers(className)
-
-                stylesAcc.orientation = orientation
-                stylesAcc.colorScheme = colorScheme
-                stylesAcc.rtl = rtl
-
                 const extractNestedStyles = (styleKey: string, styleValue: unknown) => {
                     if (typeof styleValue === 'object' && styleValue !== null) {
                         const { maxWidth, minWidth } = Processor.MQ.processMediaQuery(styleKey)
@@ -39,16 +39,19 @@ export const createStylesheetTemplate = (classes: Record<string, any>, vars: Rec
                 entries: [],
                 maxWidth: Number.MAX_VALUE,
                 minWidth: 0,
-                orientation: null,
-                colorScheme: null,
-                rtl: null,
             })
 
             return [
                 className.replace('.', '').replace(/\\/g, ''),
-                parsedStyles,
-            ]
-        }),
+                {
+                    ...parsedStyles,
+                    orientation,
+                    colorScheme,
+                    rtl,
+                    native: platform !== null,
+                },
+            ] as const
+        }).filter(isDefined),
     )
     const processedTemplateEntries = Object.entries(template).map(([className, styles]) => {
         const stylesUsingVariables: Record<string, string> = {}

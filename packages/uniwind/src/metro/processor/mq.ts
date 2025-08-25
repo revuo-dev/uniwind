@@ -1,4 +1,5 @@
 import { ColorScheme, Orientation } from '../../types'
+import { Platform } from '../types'
 import { isDefined } from '../utils'
 import type { ProcessorBuilder } from './processor'
 
@@ -19,6 +20,12 @@ export class MQ {
             rtl: this.getFromClassName(lower, {
                 ltr: false,
                 rtl: true,
+            }),
+            platform: this.getFromClassName(lower, {
+                native: Platform.Native,
+                android: Platform.Android,
+                ios: Platform.iOS,
+                web: Platform.Web,
             }),
         }
     }

@@ -1,5 +1,4 @@
 import type Bundler from 'metro/private/Bundler'
-import { ColorScheme, Orientation } from '../types'
 
 type HasteEventMetadata = {
     modifiedTime: number
@@ -45,7 +44,11 @@ export type StyleTemplateAcc = {
     entries: Array<[string, unknown]>
     maxWidth: string | number
     minWidth: string | number
-    orientation: Orientation | null
-    colorScheme: ColorScheme | null
-    rtl: boolean | null
+}
+
+export const enum Platform {
+    Android = 'android',
+    iOS = 'ios',
+    Web = 'web',
+    Native = 'native',
 }

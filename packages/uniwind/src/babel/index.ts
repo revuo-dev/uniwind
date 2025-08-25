@@ -1,4 +1,4 @@
-import type { NodePath, PluginObj, types as t } from '@babel/core'
+import type { PluginObj, types as t } from '@babel/core'
 import type { ImportDeclaration, ImportSpecifier } from '@babel/types'
 import { name } from '../../package.json'
 
@@ -31,10 +31,14 @@ export default ({ types }: { types: typeof t }): PluginObj => {
     return {
         name,
         visitor: {
-            ImportDeclaration: (path: NodePath<ImportDeclaration>) => {
+            ImportDeclaration: (path, state) => {
                 const { node } = path
 
-                if (node.source.value !== 'react-native') {
+                if (
+                    node.source.value !== 'react-native'
+                    || state.filename?.includes('uniwind/src/components')
+                    || state.filename?.includes('uniwind/components')
+                ) {
                     return
                 }
 
