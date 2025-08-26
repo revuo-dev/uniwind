@@ -158,7 +158,7 @@ export const createStylesheetTemplate = (classes: Record<string, any>, vars: Rec
 
             return `${acc}"${key}":${escapeDynamic(JSON.stringify(value))},`
         }, '')
-        const isComputed = JSON.stringify(style).includes('this[')
+        const isComputed = JSON.stringify(style).includes('this')
 
         if (isComputed) {
             return `${acc}get "${className}"() { return { ${stringifiedValue} } },`
