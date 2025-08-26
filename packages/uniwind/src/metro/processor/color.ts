@@ -8,6 +8,11 @@ export class Color {
     constructor(readonly Processor: ProcessorBuilder) {}
 
     isColor(value: string) {
+        // If value is a number, it's not a color
+        if (!isNaN(Number(value))) {
+            return false
+        }
+
         return parse(value) !== undefined
     }
 
