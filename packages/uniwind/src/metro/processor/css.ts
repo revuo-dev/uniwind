@@ -24,6 +24,8 @@ export class CSS {
 
                 return `(rt.insets.${inset})`
             }),
+            // Replace css infinity with 999999999, because it's not possible to use Infinity in RN styles
+            x => x.replace('infinity', '(999999999)'),
             // Replace max() with Math.max()
             replaceParentheses('max', match => `(Math.max(${match}))`),
             // Handle units
