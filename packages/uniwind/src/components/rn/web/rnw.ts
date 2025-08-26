@@ -1,6 +1,6 @@
 const moveCssRulesToUtilitiesLayer = (sourceSheet: CSSStyleSheet) => {
     const layerRuleIndex = sourceSheet.insertRule(
-        '@layer utilities {}',
+        '@layer rnw {}',
         0,
     )
     const layerRule = sourceSheet.cssRules[layerRuleIndex] as CSSGroupingRule
