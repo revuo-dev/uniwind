@@ -103,6 +103,21 @@ export class CSS {
                     }
 
                     return declarationValue.value
+                case 'env':
+                    if (declarationValue.value.name.type === 'ua' && declarationValue.value.name.value.startsWith('safe-area-inset-')) {
+                        const inset = declarationValue.value.name.value.replace('safe-area-inset-', '')
+
+                        return `rt.insets.${inset}`
+                    }
+
+                    this.logger.error(`Unsupported env value - ${JSON.stringify(declarationValue.value)}`)
+
+                    return declarationValue.value
+                case 'time': {
+                    const unit = declarationValue.value.type === 'milliseconds' ? 'ms' : 's'
+
+                    return `${declarationValue.value.value}${unit}`
+                }
                 case 'white-space':
                 case 'string':
                 case 'self-position':
