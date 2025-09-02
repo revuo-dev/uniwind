@@ -1,21 +1,6 @@
-export const toSafeString = (value: string) => `\`${value}\``
-
 export const isDefined = <T>(value: T): value is NonNullable<T> => value !== null && value !== undefined
 
-export const escapeDynamic = (str: string) =>
-    str.replace(/"(this|\()([^"]+)"/g, (match, type) => {
-        if (match.startsWith('"() =>')) {
-            return match.slice(1)
-        }
-
-        switch (type) {
-            case 'this':
-            case '(':
-                return match.slice(1, -1)
-            default:
-                return match
-        }
-    })
+export const toCamelCase = (str: string) => str.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())
 
 type P<I, O> = (data: I) => O
 type PipeFns<T> = {
@@ -31,35 +16,3 @@ type PipeFns<T> = {
 }
 
 export const pipe = <T>(data: T) => ((...fns: Array<any>) => fns.reduce((acc, fn) => fn(acc), data)) as PipeFns<T>
-
-export const replaceParentheses = (parent: string, replacer: (match: string) => string) => (str: string) => {
-    const parentStartIndex = str.indexOf(`${parent}(`)
-
-    if (parentStartIndex === -1) {
-        return str
-    }
-
-    const startIndex = parentStartIndex + parent.length + 1
-    let parenthesesCount = 1
-
-    for (let i = startIndex; i < str.length; i++) {
-        const char = str[i]
-
-        if (char === '(') {
-            parenthesesCount += 1
-        }
-
-        if (char === ')') {
-            parenthesesCount -= 1
-        }
-
-        if (parenthesesCount === 0) {
-            const match = str.slice(startIndex, i)
-            const replaced = replacer(match)
-
-            return str.slice(0, parentStartIndex) + replaced + str.slice(i + 1)
-        }
-    }
-
-    return str
-}

@@ -1,10 +1,17 @@
+import { MediaQuery } from 'lightningcss'
 import { ColorScheme, Orientation } from '../../types'
-import { Platform } from '../types'
-import { isDefined } from '../utils'
+import { MediaQueryResolver, Platform } from '../types'
 import type { ProcessorBuilder } from './processor'
 
 export class MQ {
-    constructor(readonly Processor: ProcessorBuilder) {}
+    constructor(private readonly Processor: ProcessorBuilder) {}
+
+    getInitialMediaQueryResolver(): MediaQueryResolver {
+        return {
+            minWidth: 0,
+            maxWidth: Number.MAX_VALUE,
+        }
+    }
 
     extractResolvers(className: string) {
         const lower = className.toLowerCase()
@@ -30,42 +37,30 @@ export class MQ {
         }
     }
 
-    processMediaQuery(mq: string) {
-        const lower = mq.toLowerCase()
+    processMediaQueries(mediaQueries: Array<MediaQuery>) {
+        const mq = this.getInitialMediaQueryResolver()
 
-        // Full range: "100px <= width < 200px"
-        const fullRangeMatch = lower.match(
-            /([\d.]+[a-z%]+)\s*<=\s*width\s*<\s*([\d.]+[a-z%]+)/,
-        ) ?? null
+        mediaQueries.forEach(mediaQuery => {
+            const { condition } = mediaQuery
 
-        const minWidth = fullRangeMatch
-            ? fullRangeMatch[1]
-            : [
-                /width\s*>=\s*([\d.]+[a-z%]+)/, // width >= N → min-width
-                /([\d.]+[a-z%]+)\s*<=\s*width/, // N <= width → min-width
-                /width\s*>\s*([\d.]+[a-z%]+)/, // width > N → min-width
-                /min-width\s*:\s*([\d.]+[a-z%]+)/, // classic min-width
-            ].reduce<string | null>(
-                (found, rx) => found ?? (lower.match(rx)?.[1] ?? null),
-                null,
-            )
+            if (condition?.type !== 'feature' || condition.value.type !== 'range' || condition.value.name !== 'width') {
+                return
+            }
 
-        const maxWidth = fullRangeMatch
-            ? fullRangeMatch[2]
-            : [
-                /width\s*<=\s*([\d.]+[a-z%]+)/, // width <= N → max-width
-                /([\d.]+[a-z%]+)\s*>=\s*width/, // N >= width → max-width
-                /width\s*<\s*([\d.]+[a-z%]+)/, // width < N → max-width
-                /max-width\s*:\s*([\d.]+[a-z%]+)/, // classic max-width
-            ].reduce<string | null>(
-                (found, rx) => found ?? (lower.match(rx)?.[1] ?? null),
-                null,
-            )
+            const { operator, value } = condition.value
 
-        return {
-            minWidth: isDefined(minWidth) ? this.Processor.CSS.processCSSValue(minWidth) : 0,
-            maxWidth: isDefined(maxWidth) ? this.Processor.CSS.processCSSValue(maxWidth) : Number.MAX_VALUE,
-        }
+            const result = this.Processor.CSS.processValue(value)
+
+            if (operator === 'greater-than-equal' || operator === 'greater-than') {
+                mq.minWidth = result
+            }
+
+            if (operator === 'less-than-equal' || operator === 'less-than') {
+                mq.maxWidth = result
+            }
+        })
+
+        return mq
     }
 
     private getFromClassName<T extends Record<string, any>>(className: string, resolver: T) {

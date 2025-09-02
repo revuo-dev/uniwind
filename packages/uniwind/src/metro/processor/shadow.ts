@@ -1,80 +1,19 @@
-import { parse } from 'culori'
+import { Logger } from '../logger'
+import { DeclarationValues } from '../types'
+import { isDefined, pipe } from '../utils'
 import type { ProcessorBuilder } from './processor'
 
-const isColor = (value: string) => parse(value) !== undefined || value.includes('color')
-
-const tokenize = (str: string) => {
-    const { tokens, current } = Array.from(str).reduce(
-        (acc, char) => {
-            const { tokens, current, parenDepth } = acc
-
-            if (char === ' ' && parenDepth === 0) {
-                return current.trim() !== ''
-                    ? {
-                        tokens: [...tokens, current.trim()],
-                        current: '',
-                        parenDepth,
-                    }
-                    : acc
-            }
-
-            const getNewParenDepth = () => {
-                if (char === '(') {
-                    return parenDepth + 1
-                }
-
-                return char === ')'
-                    ? parenDepth - 1
-                    : parenDepth
-            }
-
-            return {
-                tokens,
-                current: current + char,
-                parenDepth: getNewParenDepth(),
-            }
-        },
-        {
-            tokens: [] as Array<string>,
-            current: '',
-            parenDepth: 0,
-        },
-    )
-
-    return current.trim() !== ''
-        ? [...tokens, current.trim()]
-        : tokens
-}
-
-const toNum = (value: string): string | number => {
-    const n = parseFloat(value)
-    return (value === '0' || /px$/.test(value)) && !isNaN(n)
-        ? n
-        : value
-}
-
-const parseValue = (str: string) => {
-    const parts = tokenize(str)
-    const inset = parts.includes('inset') || parts.find(p => p.includes('inset'))
-    const filtered = parts.filter(p => p !== 'inset')
-    const color = filtered.find(isColor)
-    const nums = filtered
-        .filter((p) => p !== color && p !== inset)
-        .map(toNum)
-    const [offsetX, offsetY, blurRadius, spreadDistance] = nums
-
-    return {
-        inset,
-        offsetX,
-        offsetY,
-        blurRadius,
-        spreadDistance,
-        color,
-    }
+type ShadowType = {
+    offsetX: number | string | undefined
+    offsetY: number | string | undefined
+    blurRadius: number | string | undefined
+    spreadDistance: number | string | undefined
 }
 
 export class Shadow {
-    constructor(readonly Processor: ProcessorBuilder) {}
+    private readonly logger = new Logger('Shadow')
+
+    constructor(private readonly Processor: ProcessorBuilder) {}
 
     isShadowKey(key: string) {
         return [
@@ -86,25 +25,64 @@ export class Shadow {
         ].includes(key)
     }
 
-    processShadow(shadow: string) {
-        const shadowValues = parseValue(shadow)
+    processShadow(value: DeclarationValues) {
+        const result = this.Processor.CSS.processValue(value)
 
-        return Object.fromEntries(
-            Object.entries(shadowValues).map(([key, value]) => {
-                const getValue = () => {
-                    if (key === 'color' && typeof value !== 'number' && typeof value !== 'boolean') {
-                        return value === undefined ? 'rgb(0,0,0)' : this.Processor.CSS.processCSSValue(value)
-                    }
+        if (typeof result !== 'string') {
+            this.logger.error(`Unsupported shadow value - ${result}`)
 
-                    if (typeof value === 'string') {
-                        return this.Processor.CSS.processCSSValue(value)
-                    }
+            return ''
+        }
 
-                    return value
-                }
+        const shadows = pipe(result)(
+            x => x.replace(/\](?!\s)/g, '] '),
+            x => x.trim(),
+            x => x.split(','),
+        )
 
-                return [key, getValue()]
-            }),
+        return shadows.map(shadow => {
+            const tokens = pipe(shadow)(
+                x => this.smartSplit(x),
+                x => x.filter(token => token.length > 0),
+            )
+
+            const inset = tokens.find(token => token.includes('inset'))
+            const color = tokens.find(token => token.startsWith('#') || token.toLowerCase().includes('color'))
+            const [offsetX, offsetY, blurRadius, spreadDistance] = tokens
+                .filter(token => token !== inset && token !== color)
+                .map(x => {
+                    const numeric = Number(x)
+
+                    return isNaN(numeric) ? x : numeric
+                })
+
+            if (this.isEmptyShadow({ offsetX, offsetY, blurRadius, spreadDistance })) {
+                return null
+            }
+
+            return {
+                offsetX,
+                offsetY,
+                color,
+                blurRadius,
+                spreadDistance,
+                inset: inset?.trim().toLowerCase() === 'inset' ? true : inset,
+            }
+        }).filter(isDefined)
+    }
+
+    private isEmptyShadow(shadow: ShadowType) {
+        return Object.values(shadow).every(value => value === undefined || value === 0)
+    }
+
+    private smartSplit(str: string) {
+        const escaper = '&&&'
+
+        return pipe(str)(
+            x => x.replace(/\s\?\?\s/g, `${escaper}??${escaper}`),
+            x => x.replace(/\s([+\-*/])\s/g, `${escaper}$1${escaper}`),
+            x => x.split(' '),
+            x => x.map(token => token.replace(new RegExp(escaper, 'g'), ' ')),
         )
     }
 }

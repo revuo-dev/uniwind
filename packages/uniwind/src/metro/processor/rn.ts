@@ -1,4 +1,5 @@
-import { isDefined, pipe } from '../utils'
+/* eslint-disable prefer-template */
+import { isDefined, pipe, toCamelCase } from '../utils'
 import type { ProcessorBuilder } from './processor'
 
 const cssToRNKeyMap = {
@@ -24,6 +25,20 @@ const cssToRNKeyMap = {
     backgroundSize: 'resizeMode',
 } as Record<string, string>
 
+type PositionValues = {
+    top: string
+    right: string
+    bottom: string
+    left: string
+}
+
+type CornerValues = {
+    topLeft: string
+    topRight: string
+    bottomLeft: string
+    bottomRight: string
+}
+
 const cssToRNMap: Record<string, (value: any) => unknown> = {
     ...Object.fromEntries(
         Object.entries(cssToRNKeyMap).map(([key, transformedKey]) => {
@@ -32,11 +47,6 @@ const cssToRNMap: Record<string, (value: any) => unknown> = {
             })]
         }),
     ),
-    opacity: (value: string) => {
-        return {
-            opacity: Number(value.slice(0, -1)) / 100,
-        }
-    },
     transform: (value: string) => {
         const transforms = value.split(' ')
         const getTransform = (transformName: string) =>
@@ -139,19 +149,63 @@ const cssToRNMap: Record<string, (value: any) => unknown> = {
             ],
         }
     },
-    boxShadow: (value: string) => {
+    boxShadow: () => {
         return {
-            boxShadow: value.match(/this\[`(.*?)`\]/g) ?? [],
+            boxShadow: '['
+                + [
+                    '--tw-inset-shadow',
+                    '--tw-inset-ring-shadow',
+                    '--tw-ring-offset-shadow',
+                    '--tw-ring-shadow',
+                    '--tw-shadow',
+                ]
+                    .map(key => `this[\`${key}\`]`)
+                    .join(', ')
+                + ']',
+        }
+    },
+    borderWidth: (value: string | PositionValues) => {
+        if (typeof value === 'string') {
+            return {
+                borderWidth: value,
+            }
+        }
+
+        return {
+            borderTopWidth: value.top,
+            borderRightWidth: value.right,
+            borderBottomWidth: value.bottom,
+            borderLeftWidth: value.left,
+        }
+    },
+    borderRadius: (value: string | CornerValues) => {
+        if (typeof value === 'string') {
+            return {
+                borderRadius: value,
+            }
+        }
+
+        return {
+            borderTopLeftRadius: value.topLeft,
+            borderTopRightRadius: value.topRight,
+            borderBottomLeftRadius: value.bottomLeft,
+            borderBottomRightRadius: value.bottomRight,
         }
     },
 }
 
 export class RN {
-    constructor(readonly Processor: ProcessorBuilder) {}
+    constructor(private readonly Processor: ProcessorBuilder) {}
 
     cssToRN(property: string, value: any) {
-        const rn = cssToRNMap[property]?.(value) ?? { [property]: value }
+        if (property.startsWith('--')) {
+            return [[property, value]] as [[string, any]]
+        }
 
-        return Object.entries(rn)
+        const camelizedProperty = toCamelCase(property)
+
+        const rn = cssToRNMap[camelizedProperty]?.(value) ?? { [camelizedProperty]: value }
+
+        return Object.entries(rn) as Array<[string, any]>
     }
 }
