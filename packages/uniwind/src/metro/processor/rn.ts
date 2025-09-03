@@ -1,5 +1,5 @@
 /* eslint-disable prefer-template */
-import { isDefined, pipe, toCamelCase } from '../utils'
+import { isDefined, toCamelCase } from '../utils'
 import type { ProcessorBuilder } from './processor'
 
 const cssToRNKeyMap = {
@@ -47,62 +47,6 @@ const cssToRNMap: Record<string, (value: any) => unknown> = {
             })]
         }),
     ),
-    transform: (value: string) => {
-        const transforms = value.split(' ')
-        const getTransform = (transformName: string) =>
-            pipe(transforms)(
-                x => x.find(transform => transform.startsWith(transformName)),
-                x => x?.replace(transformName, ''),
-                x => x?.replace('(', ''),
-                x => x?.replace(')', ''),
-                x => {
-                    if (x === undefined) {
-                        return undefined
-                    }
-
-                    const isNumber = !isNaN(Number(x))
-
-                    return isNumber ? `(${x})` : x
-                },
-            )
-
-        const possibleTransforms = {
-            perspective: getTransform('perspective'),
-            rotateX: getTransform('rotateX'),
-            rotateY: getTransform('rotateY'),
-            rotateZ: getTransform('rotateZ'),
-            rotate: getTransform('rotate'),
-            translateX: getTransform('translateX'),
-            translateY: getTransform('translateY'),
-            translateZ: getTransform('translateZ'),
-            scale: getTransform('scale'),
-            scaleX: getTransform('scaleX'),
-            scaleY: getTransform('scaleY'),
-            scaleZ: getTransform('scaleZ'),
-            skewX: getTransform('skewX'),
-            skewY: getTransform('skewY'),
-            matrix: getTransform('matrix'),
-        }
-        const availableTransforms = pipe(Object.entries(possibleTransforms))(
-            entries =>
-                entries.map(([transformName, transformValue]) => {
-                    if (transformValue === undefined) {
-                        return null
-                    }
-
-                    return {
-                        [transformName]: transformValue,
-                    }
-                }),
-            entries => entries.filter(isDefined),
-        )
-
-        return {
-            transform: [
-                ...availableTransforms,
-            ],
-        }
-    },
     rotate: (value: string) => {
         return {
             transform: [
@@ -190,6 +134,25 @@ const cssToRNMap: Record<string, (value: any) => unknown> = {
             borderTopRightRadius: value.topRight,
             borderBottomLeftRadius: value.bottomLeft,
             borderBottomRightRadius: value.bottomRight,
+        }
+    },
+    transitionProperty: (value: string) => {
+        return {
+            transitionProperty: value.split(', ').map(toCamelCase),
+        }
+    },
+    flex: (value: any) => {
+        if (typeof value === 'object') {
+            return value
+        }
+
+        return {
+            flex: value,
+        }
+    },
+    transform: (value: Array<any>) => {
+        return {
+            transform: value.flat(),
         }
     },
 }

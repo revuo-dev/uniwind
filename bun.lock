@@ -92,6 +92,8 @@
         "unbuild": "3.6.1",
       },
       "peerDependencies": {
+        "chalk": ">=2",
+        "lightningcss": ">=1.30.0",
         "postcss": ">=8",
         "react": ">=19.0.0",
         "react-native": ">=0.81.0",

@@ -60,6 +60,10 @@ export class CSS {
                         return this.processValue(declarationValue.value.arguments)
                     }
 
+                    if (declarationValue.value.name === 'cubic-bezier') {
+                        return `rt.cubicBezier(${this.processValue(declarationValue.value.arguments)})`
+                    }
+
                     this.logger.error(`Unsupported function - ${declarationValue.value.name}`)
 
                     return declarationValue.type
@@ -81,6 +85,77 @@ export class CSS {
                 case 'value':
                 case 'length-percentage':
                     return this.Processor.Units.processLength(declarationValue.value)
+                case 'translate': {
+                    const [translateX, translateY] = declarationValue.value.map(x => this.processValue(x))
+
+                    return [
+                        {
+                            translateX,
+                        },
+                        {
+                            translateY,
+                        },
+                    ]
+                }
+                case 'translateX':
+                    return {
+                        translateX: this.Processor.Units.processLength(declarationValue.value),
+                    }
+                case 'translateY':
+                    return {
+                        translateY: this.Processor.Units.processLength(declarationValue.value),
+                    }
+                case 'translateZ': {
+                    return {
+                        translateZ: this.processValue(declarationValue.value),
+                    }
+                }
+                case 'rotate':
+                    return {
+                        rotate: `${declarationValue.value.value}${declarationValue.value.type}`,
+                    }
+                case 'rotateX':
+                    return {
+                        rotateX: `${declarationValue.value.value}${declarationValue.value.type}`,
+                    }
+                case 'rotateY':
+                    return {
+                        rotateY: `${declarationValue.value.value}${declarationValue.value.type}`,
+                    }
+                case 'rotateZ':
+                    return {
+                        rotateZ: `${declarationValue.value.value}${declarationValue.value.type}`,
+                    }
+                case 'scale': {
+                    const [scaleX, scaleY] = declarationValue.value.map(x => this.processValue(x))
+
+                    if (scaleX === scaleY) {
+                        return {
+                            scale: scaleX,
+                        }
+                    }
+
+                    return [
+                        {
+                            scaleX,
+                        },
+                        {
+                            scaleY,
+                        },
+                    ]
+                }
+                case 'scaleX':
+                    return {
+                        scaleX: this.processValue(declarationValue.value),
+                    }
+                case 'scaleY':
+                    return {
+                        scaleY: this.processValue(declarationValue.value),
+                    }
+                case 'scaleZ':
+                    return {
+                        scaleZ: this.processValue(declarationValue.value),
+                    }
                 case 'percentage':
                     return `${declarationValue.value * 100}%`
                 case 'token-list':
@@ -118,6 +193,18 @@ export class CSS {
 
                     return `${declarationValue.value.value}${unit}`
                 }
+                case 'cubic-bezier': {
+                    const bezier = [
+                        declarationValue.x1,
+                        declarationValue.y1,
+                        declarationValue.x2,
+                        declarationValue.y2,
+                    ]
+
+                    return `rt.cubicBezier(${bezier.join(',')})`
+                }
+                case 'seconds':
+                    return `${declarationValue.value}s`
                 case 'white-space':
                 case 'string':
                 case 'self-position':
@@ -163,22 +250,39 @@ export class CSS {
         }
 
         if (Array.isArray(declarationValue)) {
-            return declarationValue.reduce<string | number>((acc, value, index, array) => {
-                if (typeof value === 'object') {
-                    // Dimensions might be duplicated
-                    if (this.isDimension(value) && this.isDimension(array.at(index + 1))) {
+            switch (meta.propertyName) {
+                case 'transform':
+                    return declarationValue.reduce<Array<any>>((acc, value) => {
+                        if (typeof value === 'object') {
+                            const result = this.processValue(value)
+
+                            acc.push(result)
+
+                            return acc
+                        }
+
+                        acc.push(value)
+
                         return acc
-                    }
+                    }, [])
+                default:
+                    return declarationValue.reduce<any>((acc, value, index, array) => {
+                        if (typeof value === 'object') {
+                            // Dimensions might be duplicated
+                            if (this.isDimension(value) && this.isDimension(array.at(index + 1))) {
+                                return acc
+                            }
 
-                    const result = this.processValue(value)
+                            const result = this.processValue(value)
 
-                    return acc === '' && typeof result === 'number'
-                        ? result
-                        : acc + result
-                }
+                            return acc === '' && typeof result === 'number'
+                                ? result
+                                : acc + result
+                        }
 
-                return acc + value
-            }, '')
+                        return acc + value
+                    }, '')
+            }
         }
 
         this.logger.error(`Unsupported value type - ${JSON.stringify(declarationValue)}`)

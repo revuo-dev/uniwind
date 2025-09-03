@@ -6,7 +6,7 @@ export const createVarsTemplate = (rules: Array<Rule<Declaration, MediaQuery>>) 
 
     const parseDeclaration = (declaration: Declaration) => {
         if (declaration.property === 'custom' && declaration.value.name.startsWith('--')) {
-            vars[declaration.value.name] = Processor.CSS.processValue(declaration.value.value)
+            vars[declaration.value.name] = Processor.CSS.processValue(declaration.value.value, { propertyName: declaration.value.name })
         }
     }
 
