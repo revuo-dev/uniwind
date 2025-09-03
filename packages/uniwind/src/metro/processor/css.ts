@@ -1,6 +1,7 @@
 import { Declaration } from 'lightningcss'
 import { Logger } from '../logger'
 import { DeclarationValues, ProcessMetaValues } from '../types'
+import { pipe } from '../utils'
 import type { ProcessorBuilder } from './processor'
 
 export class CSS {
@@ -61,7 +62,12 @@ export class CSS {
                     }
 
                     if (declarationValue.value.name === 'cubic-bezier') {
-                        return `rt.cubicBezier(${this.processValue(declarationValue.value.arguments)})`
+                        const cubicArguments = pipe(this.processValue(declarationValue.value.arguments))(
+                            String,
+                            x => x.replace(/,\s/g, ','),
+                        )
+
+                        return `rt.cubicBezier(${cubicArguments})`
                     }
 
                     this.logger.error(`Unsupported function - ${declarationValue.value.name}`)
@@ -205,6 +211,8 @@ export class CSS {
                 }
                 case 'seconds':
                     return `${declarationValue.value}s`
+                case 'milliseconds':
+                    return `${declarationValue.value}ms`
                 case 'white-space':
                 case 'string':
                 case 'self-position':
@@ -283,6 +291,14 @@ export class CSS {
                         return acc + value
                     }, '')
             }
+        }
+
+        if ('property' in declarationValue) {
+            const property = typeof declarationValue.property === 'string'
+                ? declarationValue.property
+                : declarationValue.property.property
+
+            return `${property},`
         }
 
         this.logger.error(`Unsupported value type - ${JSON.stringify(declarationValue)}`)

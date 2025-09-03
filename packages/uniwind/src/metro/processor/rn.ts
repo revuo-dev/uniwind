@@ -138,7 +138,7 @@ const cssToRNMap: Record<string, (value: any) => unknown> = {
     },
     transitionProperty: (value: string) => {
         return {
-            transitionProperty: value.split(', ').map(toCamelCase),
+            transitionProperty: value.split(',').map(toCamelCase),
         }
     },
     flex: (value: any) => {
