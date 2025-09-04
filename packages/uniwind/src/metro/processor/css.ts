@@ -58,7 +58,18 @@ export class CSS {
                     }
 
                     if (declarationValue.value.name === 'calc') {
-                        return this.processValue(declarationValue.value.arguments)
+                        const calc = this.processValue(declarationValue.value.arguments)
+
+                        return pipe(calc)(
+                            String,
+                            x => {
+                                if (x.includes('%')) {
+                                    return this.tryPercentageEval(x)
+                                }
+
+                                return x
+                            },
+                        )
                     }
 
                     if (declarationValue.value.name === 'cubic-bezier') {
@@ -356,5 +367,18 @@ export class CSS {
 
     private isOverflow(value: any): value is { x: OverflowKeyword; y: OverflowKeyword } {
         return typeof value === 'object' && 'x' in value && ['hidden', 'visible'].includes(value.x)
+    }
+
+    private tryPercentageEval(value: string) {
+        try {
+            const numericValue = value.replace(/%/g, '')
+
+            // eslint-disable-next-line @typescript-eslint/no-implied-eval, no-new-func
+            return new Function(`return ${numericValue} + '%'`)()
+        } catch {
+            this.logger.error(`Invalid calc ${value}`)
+
+            return value
+        }
     }
 }
