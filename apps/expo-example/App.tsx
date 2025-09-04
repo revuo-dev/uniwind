@@ -4,7 +4,7 @@ import { Image, ScrollView, Text, TextInput, TouchableOpacity, View } from 'reac
 
 const TailwindTestPage = () => {
     return (
-        <ScrollView className="flex-1 bg-gray-100 pt-10">
+        <ScrollView className="flex-1 bg-gray-100 py-safe-or-10">
             {/* Layout & Flexbox */}
             <View className="p-4">
                 <Text className="text-2xl font-bold mb-4 text-gray-800">Layout & Flexbox</Text>

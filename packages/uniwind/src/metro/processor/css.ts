@@ -70,6 +70,10 @@ export class CSS {
                         return `rt.cubicBezier(${cubicArguments})`
                     }
 
+                    if (declarationValue.value.name === 'max') {
+                        return `Math.max( ${this.processValue(declarationValue.value.arguments)} )`
+                    }
+
                     this.logger.error(`Unsupported function - ${declarationValue.value.name}`)
 
                     return declarationValue.type
