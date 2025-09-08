@@ -1,4 +1,4 @@
-import { ColorScheme, Orientation } from '../types'
+import { ColorScheme, Orientation, StyleDependency } from '../types'
 
 export type Style = {
     entries: Array<[string, unknown]>
@@ -10,6 +10,7 @@ export type Style = {
     colorScheme: ColorScheme | null
     rtl: boolean | null
     native: boolean
+    dependencies: Array<StyleDependency>
 }
 
 export type StyleSheets = Record<string, Style>

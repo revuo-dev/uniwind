@@ -1,3 +1,4 @@
+import { StyleDependency } from '../../../types'
 import { UniwindRuntime } from '../../runtime'
 import { Style, StyleSheets } from '../../types'
 import { styleToClass } from '../../utils'
@@ -31,23 +32,29 @@ export class UniwindStoreBuilder {
     }
 
     getSnapshot(props: UniwindComponentProps, additionalStyles?: Array<RNStylesProps>) {
+        const { styles, dependencies } = this.getStyles(props.className ?? '')
+
         return {
             dynamicStyles: {
                 style: [
-                    this.getStyles(props.className ?? ''),
+                    styles,
                     props.style,
                 ],
                 ...additionalStyles?.reduce((acc, styleProp) => {
                     const className = props[styleToClass(styleProp)] ?? ''
+                    const { styles, dependencies: additionalDependencies } = this.getStyles(className)
+
+                    dependencies.push(...additionalDependencies)
 
                     acc[styleProp] = [
-                        this.getStyles(className),
+                        styles,
                         props[styleProp],
                     ]
 
                     return acc
                 }, {} as Record<RNStylesProps, [RNStyle, unknown]>),
             },
+            dependencies: Array.from(new Set(dependencies)),
         }
     }
 
@@ -56,6 +63,7 @@ export class UniwindStoreBuilder {
         const bestBreakpoints = {} as Record<string, number>
         const stylesUsingVariables = [] as Array<[string, string]>
         const inlineVariables = [] as Array<[string, () => unknown]>
+        const dependencies = [] as Array<StyleDependency>
 
         styles.forEach(style => {
             if (
@@ -67,6 +75,7 @@ export class UniwindStoreBuilder {
             }
 
             inlineVariables.push(...style.inlineVariables)
+            dependencies.push(...style.dependencies)
 
             style.entries.forEach(([property, value]) => {
                 if (
@@ -79,16 +88,18 @@ export class UniwindStoreBuilder {
                         stylesUsingVariables.push([property, style.stylesUsingVariables[property]])
                     }
 
-                    if (property === 'transform' && Array.isArray(value)) {
-                        result[property] = result[property] ?? []
-                        result[property].push(...value)
-                    } else {
-                        result[property] = value
-                    }
-
                     bestBreakpoints[property] = style.colorScheme !== null || style.orientation !== null || style.rtl !== null || style.native
                         ? Infinity
                         : style.minWidth
+
+                    if (property === 'transform' && Array.isArray(value)) {
+                        result[property] = result[property] ?? []
+                        result[property].push(...value)
+
+                        return
+                    }
+
+                    result[property] = value
                 }
             })
         })
@@ -138,11 +149,13 @@ export class UniwindStoreBuilder {
             result.transform = result.transform.filter(Boolean)
         }
 
-        return result
+        return {
+            styles: result,
+            dependencies: Array.from(new Set(dependencies)),
+        }
     }
 
     reload = () => {
-        this.runtime = UniwindRuntime
         this.stylesheets = globalThis.__uniwind__computeStylesheet(this.runtime)
         this.listeners.forEach(listener => listener())
     }

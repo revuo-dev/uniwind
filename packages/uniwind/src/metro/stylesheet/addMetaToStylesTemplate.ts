@@ -1,3 +1,4 @@
+import { StyleDependency } from '../../types'
 import { Processor } from '../processor'
 import { Platform, StylesTemplate } from '../types'
 import { isDefined } from '../utils'
@@ -19,6 +20,7 @@ export const addMetaToStylesTemplate = (styles: StylesTemplate, currentPlatform:
 
             const stylesUsingVariables: Record<string, string> = {}
             const inlineVariables: Array<[string, string]> = []
+            const dependencies: Array<StyleDependency> = []
 
             const filteredEntries = entries
                 .filter(([property, value]) => {
@@ -37,6 +39,32 @@ export const addMetaToStylesTemplate = (styles: StylesTemplate, currentPlatform:
                     return true
                 })
 
+            const stringifiedEntries = JSON.stringify(filteredEntries)
+
+            if (colorScheme !== null) {
+                dependencies.push(StyleDependency.ColorScheme)
+            }
+
+            if (orientation !== null) {
+                dependencies.push(StyleDependency.Orientation)
+            }
+
+            if (rtl !== null) {
+                dependencies.push(StyleDependency.Rtl)
+            }
+
+            if (Number(styles.minWidth) !== 0 || Number(styles.maxWidth) !== Number.MAX_VALUE || stringifiedEntries.includes('rt.screen')) {
+                dependencies.push(StyleDependency.Dimensions)
+            }
+
+            if (stringifiedEntries.includes('rt.insets')) {
+                dependencies.push(StyleDependency.Insets)
+            }
+
+            if (stringifiedEntries.includes('rt.rem')) {
+                dependencies.push(StyleDependency.FontScale)
+            }
+
             return [
                 className,
                 {
@@ -49,6 +77,7 @@ export const addMetaToStylesTemplate = (styles: StylesTemplate, currentPlatform:
                     native: platform !== null,
                     stylesUsingVariables,
                     inlineVariables,
+                    dependencies,
                 },
             ] as const
         })
