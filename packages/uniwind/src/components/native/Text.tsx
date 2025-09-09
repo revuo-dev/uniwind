@@ -1,7 +1,7 @@
 import { Text as RNText, TextProps } from 'react-native'
 import { useUniwindAccent } from '../../hooks'
 import { copyComponentProperties } from '../utils'
-import { useStyle } from './useStyles'
+import { useStyle } from './useStyle'
 
 export const Text = copyComponentProperties(RNText, (props: TextProps) => {
     const style = useStyle(props.className)

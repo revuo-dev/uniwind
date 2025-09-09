@@ -1,10 +1,11 @@
 import { RefreshControl as RNRefreshControl, RefreshControlProps } from 'react-native'
 import { useUniwindAccent } from '../../hooks'
 import { copyComponentProperties } from '../utils'
-import { useStyle } from './useStyles'
+import { useStyle } from './useStyle'
 
 export const RefreshControl = copyComponentProperties(RNRefreshControl, (props: RefreshControlProps) => {
     const style = useStyle(props.className)
+    const color = useUniwindAccent(props.colorsClassName)
     const tintColor = useUniwindAccent(props.tintColorClassName)
     const titleColor = useUniwindAccent(props.titleColorClassName)
     const progressBackgroundColor = useUniwindAccent(props.progressBackgroundColorClassName)
@@ -13,8 +14,7 @@ export const RefreshControl = copyComponentProperties(RNRefreshControl, (props: 
         <RNRefreshControl
             {...props}
             style={[style, props.style]}
-            // TODO
-            colors={props.colors}
+            colors={color !== undefined ? [color] : props.colors}
             tintColor={tintColor ?? props.tintColor}
             titleColor={titleColor ?? props.titleColor}
             progressBackgroundColor={progressBackgroundColor ?? props.progressBackgroundColor}

@@ -1,6 +1,7 @@
 import { FlatList as RNFlatList, FlatListProps } from 'react-native'
+import { useUniwindAccent } from '../../hooks'
 import { copyComponentProperties } from '../utils'
-import { useStyle } from './useStyles'
+import { useStyle } from './useStyle'
 
 export const FlatList = copyComponentProperties(RNFlatList, (props: FlatListProps<unknown>) => {
     const style = useStyle(props.className)
@@ -8,6 +9,7 @@ export const FlatList = copyComponentProperties(RNFlatList, (props: FlatListProp
     const styleContentContainer = useStyle(props.contentContainerClassName)
     const styleListFooterComponent = useStyle(props.ListFooterComponentClassName)
     const styleListHeaderComponent = useStyle(props.ListHeaderComponentClassName)
+    const endFillColor = useUniwindAccent(props.endFillColorClassName)
 
     return (
         <RNFlatList
@@ -17,6 +19,7 @@ export const FlatList = copyComponentProperties(RNFlatList, (props: FlatListProp
             contentContainerStyle={[styleContentContainer, props.contentContainerStyle]}
             ListFooterComponentStyle={[styleListFooterComponent, props.ListFooterComponentStyle]}
             ListHeaderComponentStyle={[styleListHeaderComponent, props.ListHeaderComponentStyle]}
+            endFillColor={endFillColor ?? props.endFillColor}
         />
     )
 })

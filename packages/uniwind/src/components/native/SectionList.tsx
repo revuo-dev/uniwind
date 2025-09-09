@@ -1,7 +1,7 @@
 import { SectionList as RNSectionList, SectionListProps } from 'react-native'
 import { useUniwindAccent } from '../../hooks'
 import { copyComponentProperties } from '../utils'
-import { useStyle } from './useStyles'
+import { useStyle } from './useStyle'
 
 export const SectionList = copyComponentProperties(RNSectionList, (props: SectionListProps<unknown, unknown>) => {
     const style = useStyle(props.className)

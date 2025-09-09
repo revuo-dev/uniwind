@@ -4,7 +4,7 @@ import { copyComponentProperties } from '../utils'
 import { toRNWClassName } from './rnw'
 
 export const ActivityIndicator = copyComponentProperties(RNActivityIndicator, (props: ActivityIndicatorProps) => {
-    const color = useUniwindAccent(props.className)
+    const color = useUniwindAccent(props.colorClassName)
 
     return (
         <RNActivityIndicator

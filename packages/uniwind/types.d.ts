@@ -50,7 +50,8 @@ declare module 'react-native' {
         className?: never
         ios_backgroundColorClassName?: string
         thumbColorClassName?: string
-        trackColorClassName?: string
+        trackColorOnClassName?: string
+        trackColorOffClassName?: string
     }
 
     interface TextProps {
@@ -80,7 +81,7 @@ declare module 'react-native' {
     }
 
     interface RefreshControlProps {
-        colorsClassName?: Array<string>
+        colorsClassName?: string
         progressBackgroundColorClassName?: string
         tintColorClassName?: string
         titleColorClassName?: string

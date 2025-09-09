@@ -1,7 +1,7 @@
 import { TextInput as RNTextInput, TextInputProps } from 'react-native'
 import { useUniwindAccent } from '../../hooks'
 import { copyComponentProperties } from '../utils'
-import { useStyle } from './useStyles'
+import { useStyle } from './useStyle'
 
 export const TextInput = copyComponentProperties(RNTextInput, (props: TextInputProps) => {
     const style = useStyle(props.className)

@@ -1,7 +1,7 @@
 import { TouchableHighlight as RNTouchableHighlight, TouchableHighlightProps } from 'react-native'
 import { useUniwindAccent } from '../../hooks'
 import { copyComponentProperties } from '../utils'
-import { useStyle } from './useStyles'
+import { useStyle } from './useStyle'
 
 export const TouchableHighlight = copyComponentProperties(RNTouchableHighlight, (props: TouchableHighlightProps) => {
     const style = useStyle(props.className)

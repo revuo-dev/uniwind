@@ -1,7 +1,7 @@
 import { ScrollView as RNScrollView, ScrollViewProps } from 'react-native'
 import { useUniwindAccent } from '../../hooks'
 import { copyComponentProperties } from '../utils'
-import { useStyle } from './useStyles'
+import { useStyle } from './useStyle'
 
 export const ScrollView = copyComponentProperties(RNScrollView, (props: ScrollViewProps) => {
     const style = useStyle(props.className)

@@ -1,7 +1,7 @@
 import { VirtualizedList as RNVirtualizedList, VirtualizedListProps } from 'react-native'
 import { useUniwindAccent } from '../../hooks'
 import { copyComponentProperties } from '../utils'
-import { useStyle } from './useStyles'
+import { useStyle } from './useStyle'
 
 export const VirtualizedList = copyComponentProperties(RNVirtualizedList, (props: VirtualizedListProps<unknown>) => {
     const style = useStyle(props.className)

@@ -1,6 +1,6 @@
 import { Pressable as RNPressable, PressableProps } from 'react-native'
 import { copyComponentProperties } from '../utils'
-import { useStyle } from './useStyles'
+import { useStyle } from './useStyle'
 
 export const Pressable = copyComponentProperties(RNPressable, (props: PressableProps) => {
     const style = useStyle(props.className)

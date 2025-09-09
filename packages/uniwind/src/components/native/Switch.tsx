@@ -1,10 +1,12 @@
 import { Switch as RNSwitch, SwitchProps } from 'react-native'
 import { useUniwindAccent } from '../../hooks'
 import { copyComponentProperties } from '../utils'
-import { useStyle } from './useStyles'
+import { useStyle } from './useStyle'
 
 export const Switch = copyComponentProperties(RNSwitch, (props: SwitchProps) => {
     const style = useStyle(props.className)
+    const trackColorOn = useUniwindAccent(props.trackColorOnClassName)
+    const trackColorOff = useUniwindAccent(props.trackColorOffClassName)
     const thumbColor = useUniwindAccent(props.thumbColorClassName)
     const ios_backgroundColor = useUniwindAccent(props.ios_backgroundColorClassName)
 
@@ -13,8 +15,7 @@ export const Switch = copyComponentProperties(RNSwitch, (props: SwitchProps) => 
             {...props}
             style={[style, props.style]}
             thumbColor={thumbColor ?? props.thumbColor}
-            // TODO
-            trackColor={props.trackColor}
+            trackColor={{ true: trackColorOn ?? props.trackColor?.true, false: trackColorOff ?? props.trackColor?.false }}
             ios_backgroundColor={ios_backgroundColor ?? props.ios_backgroundColor}
         />
     )
