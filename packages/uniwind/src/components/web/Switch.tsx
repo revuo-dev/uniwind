@@ -7,7 +7,6 @@ export const Switch = copyComponentProperties(RNSwitch, (props: SwitchProps) => 
     const trackColorOn = useUniwindAccent(props.trackColorOnClassName)
     const trackColorOff = useUniwindAccent(props.trackColorOffClassName)
     const thumbColor = useUniwindAccent(props.thumbColorClassName)
-    const ios_backgroundColor = useUniwindAccent(props.ios_backgroundColorClassName)
 
     return (
         <RNSwitch
@@ -15,7 +14,6 @@ export const Switch = copyComponentProperties(RNSwitch, (props: SwitchProps) => 
             style={[toRNWClassName(props.className), props.style]}
             thumbColor={thumbColor ?? props.thumbColor}
             trackColor={{ true: trackColorOn ?? props.trackColor?.true, false: trackColorOff ?? props.trackColor?.false }}
-            ios_backgroundColor={ios_backgroundColor ?? props.ios_backgroundColor}
         />
     )
 })

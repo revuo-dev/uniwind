@@ -38,7 +38,6 @@ class CSSListenerBuilder {
 
             const listeners = this.listeners.get(mediaQuery)
 
-            listener()
             listeners?.add(listener)
             disposables.push(() => listeners?.delete(listener))
         })
