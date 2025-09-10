@@ -194,6 +194,9 @@ const cssToRNMap: Record<string, (value: any) => unknown> = {
             '--tw-scale-z': percentageToFloat(value),
         }
     },
+    backdropFilter: () => ({}),
+    backgroundImage: () => ({}),
+    borderSpacing: () => ({}),
 }
 
 const percentageToFloat = (value: string) => {

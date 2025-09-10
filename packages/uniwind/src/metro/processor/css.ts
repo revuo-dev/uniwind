@@ -1,4 +1,4 @@
-import { Declaration, OverflowKeyword } from 'lightningcss'
+import { BackgroundPosition, Declaration, OverflowKeyword } from 'lightningcss'
 import { Logger } from '../logger'
 import { DeclarationValues, ProcessMetaValues } from '../types'
 import { pipe } from '../utils'
@@ -202,6 +202,21 @@ export class CSS {
                 case 'max':
                 case 'abs':
                     return this.Processor.Functions.processMathFunction(declarationValue.type, declarationValue.value)
+                case 'keyword':
+                    if ('value' in declarationValue) {
+                        return declarationValue.value
+                    }
+
+                    this.logger.error(`Unsupported keyword value - ${JSON.stringify(declarationValue)}`)
+
+                    return declarationValue.type
+                case 'min-max':
+                case 'track-breadth':
+                    return declarationValue.type
+                case 'explicit':
+                    return `${this.processValue(declarationValue.width)} ${this.processValue(declarationValue.height)}`
+                case 'angle':
+                    return `${declarationValue.value.value}${declarationValue.value.type}`
                 case 'white-space':
                 case 'string':
                 case 'self-position':
@@ -322,6 +337,16 @@ export class CSS {
             }
         }
 
+        if ('auto' in declarationValue) {
+            return declarationValue.ratio
+                ? `${declarationValue.ratio[0]}/${declarationValue.ratio[1]}`
+                : 'auto'
+        }
+
+        if (this.isBackgroundPosition(declarationValue)) {
+            return ''
+        }
+
         this.logger.error(
             [
                 `Unsupported value ${JSON.stringify(declarationValue)}`,
@@ -339,5 +364,9 @@ export class CSS {
 
     private isOverflow(value: any): value is { x: OverflowKeyword; y: OverflowKeyword } {
         return typeof value === 'object' && 'x' in value && ['hidden', 'visible'].includes(value.x)
+    }
+
+    private isBackgroundPosition(value: any): value is BackgroundPosition {
+        return typeof value === 'object' && 'x' in value && 'y' in value && Object.keys(value).length === 2
     }
 }

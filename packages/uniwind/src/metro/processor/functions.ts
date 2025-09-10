@@ -84,6 +84,26 @@ export class Functions {
             return `Math.max( ${this.Processor.CSS.processValue(fn.arguments)} )`
         }
 
+        if (
+            [
+                'blur',
+                'brightness',
+                'contrast',
+                'grayscale',
+                'hue-rotate',
+                'invert',
+                'opacity',
+                'saturate',
+                'sepia',
+                'conic-gradient',
+                'linear-gradient',
+                'radial-gradient',
+            ].includes(fn.name)
+        ) {
+            // Not supported by RN
+            return '""'
+        }
+
         this.logger.error(`Unsupported function - ${fn.name}`)
 
         return fn.name
