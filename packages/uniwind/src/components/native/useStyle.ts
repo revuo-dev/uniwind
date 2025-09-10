@@ -6,7 +6,7 @@ export const useStyle = (className?: string) => {
     const styleState = useMemo(() => UniwindStore.getStyles(className), [className, _])
 
     useEffect(() => {
-        const dispose = UniwindStore.subscribe(() => rerender, styleState.dependencies)
+        const dispose = UniwindStore.subscribe(() => rerender(), styleState.dependencies)
 
         return dispose
     }, [styleState])
