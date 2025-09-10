@@ -1,4 +1,12 @@
-import type { Declaration, MediaFeatureValue, ParsedComponent, Token, TokenOrValue } from 'lightningcss'
+import type {
+    Declaration,
+    MathFunctionFor_DimensionPercentageFor_LengthValue,
+    MathFunctionFor_Length,
+    MediaFeatureValue,
+    ParsedComponent,
+    Token,
+    TokenOrValue,
+} from 'lightningcss'
 import type Bundler from 'metro/private/Bundler'
 
 type HasteEventMetadata = {
@@ -63,6 +71,8 @@ export type DeclarationValues =
     | ParsedComponent
     | Array<TokenOrValue>
     | MediaFeatureValue
+    | MathFunctionFor_DimensionPercentageFor_LengthValue
+    | MathFunctionFor_Length
 
 export type ProcessMetaValues = {
     propertyName?: string

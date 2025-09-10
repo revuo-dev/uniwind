@@ -64,7 +64,7 @@ export class CSS {
                             String,
                             x => {
                                 if (x.includes('%')) {
-                                    return this.tryPercentageEval(x)
+                                    return this.Processor.Calc.tryPercentageEval(x)
                                 }
 
                                 return x
@@ -232,6 +232,8 @@ export class CSS {
                     return declarationValue.inside.type
                 case 'currentcolor':
                     return 'this["currentColor"]'
+                case 'calc':
+                    return this.Processor.Calc.processCalc(declarationValue.value)
                 case 'white-space':
                 case 'string':
                 case 'self-position':
@@ -369,18 +371,5 @@ export class CSS {
 
     private isOverflow(value: any): value is { x: OverflowKeyword; y: OverflowKeyword } {
         return typeof value === 'object' && 'x' in value && ['hidden', 'visible'].includes(value.x)
-    }
-
-    private tryPercentageEval(value: string) {
-        try {
-            const numericValue = value.replace(/%/g, '')
-
-            // eslint-disable-next-line @typescript-eslint/no-implied-eval, no-new-func
-            return new Function(`return ${numericValue} + '%'`)()
-        } catch {
-            this.logger.error(`Invalid calc ${value}`)
-
-            return value
-        }
     }
 }
