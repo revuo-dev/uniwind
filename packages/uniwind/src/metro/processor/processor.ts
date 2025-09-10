@@ -1,6 +1,6 @@
-import { Calc } from './calc'
 import { Color } from './color'
 import { CSS } from './css'
+import { Functions } from './functions'
 import { MQ } from './mq'
 import { RN } from './rn'
 import { Shadow } from './shadow'
@@ -15,7 +15,7 @@ export class ProcessorBuilder {
     MQ = new MQ(this)
     Color = new Color(this)
     Units = new Units(this)
-    Calc = new Calc(this)
+    Functions = new Functions(this)
 }
 
 export const Processor = new ProcessorBuilder()

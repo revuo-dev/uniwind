@@ -20,7 +20,7 @@ const toJSExpression = (value: string): string => {
         return value
             .split(' ')
             .map(token => {
-                if (isJSExpression(token) || /[-+/*?()]/.test(token) || isNumber(token)) {
+                if (isJSExpression(token) || /[-+/*?(),]/.test(token) || isNumber(token)) {
                     return token
                 }
 

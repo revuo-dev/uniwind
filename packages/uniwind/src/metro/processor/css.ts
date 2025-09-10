@@ -51,43 +51,7 @@ export class CSS {
         if (('type' in declarationValue)) {
             switch (declarationValue.type) {
                 case 'function':
-                    if (typeof declarationValue.value !== 'object') {
-                        this.logger.error(`Unsupported function - ${declarationValue.value}`)
-
-                        return declarationValue.type
-                    }
-
-                    if (declarationValue.value.name === 'calc') {
-                        const calc = this.processValue(declarationValue.value.arguments)
-
-                        return pipe(calc)(
-                            String,
-                            x => {
-                                if (x.includes('%')) {
-                                    return this.Processor.Calc.tryPercentageEval(x)
-                                }
-
-                                return x
-                            },
-                        )
-                    }
-
-                    if (declarationValue.value.name === 'cubic-bezier') {
-                        const cubicArguments = pipe(this.processValue(declarationValue.value.arguments))(
-                            String,
-                            x => x.replace(/,\s/g, ','),
-                        )
-
-                        return `rt.cubicBezier(${cubicArguments})`
-                    }
-
-                    if (declarationValue.value.name === 'max') {
-                        return `Math.max( ${this.processValue(declarationValue.value.arguments)} )`
-                    }
-
-                    this.logger.error(`Unsupported function - ${declarationValue.value.name}`)
-
-                    return declarationValue.type
+                    return this.Processor.Functions.processFunction(declarationValue.value)
                 case 'var':
                     return this.Processor.Var.processVar(declarationValue.value)
                 case 'number':
@@ -233,7 +197,11 @@ export class CSS {
                 case 'currentcolor':
                     return 'this["currentColor"]'
                 case 'calc':
-                    return this.Processor.Calc.processCalc(declarationValue.value)
+                    return this.Processor.Functions.processCalc(declarationValue.value)
+                case 'min':
+                case 'max':
+                case 'abs':
+                    return this.Processor.Functions.processMathFunction(declarationValue.type, declarationValue.value)
                 case 'white-space':
                 case 'string':
                 case 'self-position':
