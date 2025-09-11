@@ -84,6 +84,10 @@ export class Functions {
             return `Math.max( ${this.Processor.CSS.processValue(fn.arguments)} )`
         }
 
+        if (fn.name === 'linear-gradient') {
+            return this.Processor.CSS.processValue(fn.arguments)
+        }
+
         if (
             [
                 'blur',
@@ -96,7 +100,6 @@ export class Functions {
                 'saturate',
                 'sepia',
                 'conic-gradient',
-                'linear-gradient',
                 'radial-gradient',
             ].includes(fn.name)
         ) {

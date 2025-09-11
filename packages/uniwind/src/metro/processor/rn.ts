@@ -195,7 +195,9 @@ const cssToRNMap: Record<string, (value: any) => unknown> = {
         }
     },
     backdropFilter: () => ({}),
-    backgroundImage: () => ({}),
+    backgroundImage: value => ({
+        experimental_backgroundImage: value,
+    }),
     borderSpacing: () => ({}),
 }
 

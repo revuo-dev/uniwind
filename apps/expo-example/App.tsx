@@ -631,6 +631,24 @@ const TailwindTestPage = () => {
                     </View>
                 </View>
             </View>
+
+            {/* Gradients */}
+            <View className="px-4 mb-8">
+                <Text className="text-2xl font-bold mb-4 text-gray-800">Gradients</Text>
+
+                <View className="bg-white p-4 rounded-lg mb-4">
+                    <Text className="text-lg font-semibold mb-4 text-gray-700">Linear to bottom</Text>
+                    <View className="bg-gradient-to-b from-indigo-500 to-pink-500 rounded h-16 mb-4" />
+                    <Text className="text-lg font-semibold mb-4 text-gray-700">Linear to right 3 colors</Text>
+                    <View className="bg-gradient-to-r from-indigo-500 via-sky-500 to-pink-500 rounded h-16 mb-4" />
+                    <Text className="text-lg font-semibold mb-4 text-gray-700">Linear to bottom left</Text>
+                    <View className="bg-gradient-to-bl from-orange-200 to-red-900 rounded h-32 mb-4" />
+                    <Text className="text-lg font-semibold mb-4 text-gray-700">Linear 150 deg</Text>
+                    <View className="bg-linear-150 from-orange-500 to-indigo-600 rounded h-32 mb-4" />
+                    <Text className="text-lg font-semibold mb-4 text-gray-700">Linear custom multiple colors</Text>
+                    <View className="bg-linear-[25deg,red_5%,yellow_60%,lime_90%,teal] rounded h-32 mb-4" />
+                </View>
+            </View>
         </ScrollView>
     )
 }

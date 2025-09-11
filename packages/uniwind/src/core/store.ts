@@ -1,4 +1,5 @@
 import { StyleDependency } from '../types'
+import { resolveGradient } from './gradient'
 import { listenToNativeUpdates } from './nativeListener'
 import { UniwindRuntime } from './runtime'
 import { Style, StyleSheets } from './types'
@@ -92,10 +93,10 @@ export class UniwindStoreBuilder {
         })
 
         if (inlineVariables.length > 0) {
-            const originalVars = [] as Array<[string, PropertyDescriptor | undefined]>
+            const originalVars = new Map<string, PropertyDescriptor | undefined>()
 
             inlineVariables.forEach(([varName, varValue]) => {
-                originalVars.push([varName, Object.getOwnPropertyDescriptor(this.stylesheets, varName)])
+                !originalVars.has(varName) && originalVars.set(varName, Object.getOwnPropertyDescriptor(this.stylesheets, varName))
                 Object.defineProperty(this.stylesheets, varName, {
                     get: varValue,
                     configurable: true,
@@ -113,7 +114,7 @@ export class UniwindStoreBuilder {
                 }
             })
 
-            originalVars.forEach(([varName, descriptor]) => {
+            originalVars.forEach((descriptor, varName) => {
                 if (descriptor) {
                     Object.defineProperty(this.stylesheets, varName, descriptor)
 
@@ -134,6 +135,10 @@ export class UniwindStoreBuilder {
 
         if (result.transform !== undefined) {
             result.transform = result.transform.filter(Boolean)
+        }
+
+        if (result.experimental_backgroundImage !== undefined) {
+            result.experimental_backgroundImage = resolveGradient(result.experimental_backgroundImage)
         }
 
         return {

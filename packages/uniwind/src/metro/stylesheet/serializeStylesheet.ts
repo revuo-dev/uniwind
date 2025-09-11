@@ -1,5 +1,5 @@
 import { Logger } from '../logger'
-import { isNumber } from '../utils'
+import { isNumber, pipe } from '../utils'
 
 type Stylesheet = Record<string, any>
 
@@ -13,21 +13,40 @@ const isJSExpression = (value: string) =>
 
 const toJSExpression = (value: string): string => {
     if (!isJSExpression(value)) {
+        if (value.startsWith('"')) {
+            return value
+        }
+
         return `"${value.trim()}"`
     }
 
     if (!value.includes('() =>')) {
-        return value
-            .split(' ')
-            .map(token => {
+        return pipe(value)(
+            x => x.split(' '),
+            x => x.map(token => {
                 if (isJSExpression(token) || /[-+/*?(),]/.test(token) || isNumber(token)) {
                     return token
                 }
 
                 return `"${token}"`
-            })
-            .join(' ')
-            .replace(/" "/g, ' ')
+            }),
+            x => x.join(' '),
+            x => x.replace(/" "/g, ' '),
+            x => {
+                // Convert "X, Y, Z" to [X, Y, Z] and serialize it, regex is to exclude functions like Math.max
+                if (x.includes(',') && !x.startsWith('[') && !/^[A-Za-z.]+\(\s+/.test(x)) {
+                    const withArray = x
+                        .replace(' ?? ', '&&&??&&&')
+                        .split(' ')
+                        .map(token => token.replace(',', ''))
+                        .map(token => token.replace('&&&??&&&', ' ?? '))
+
+                    return serialize(withArray)
+                }
+
+                return x
+            },
+        )
     }
 
     const [, after] = value.split('() =>')
@@ -67,6 +86,13 @@ const serialize = (value: any): string => {
             ].join('')
         }
         case 'string':
+            // Percentage regex, round to 3 decimal places
+            if (/^\s*[+-]?(?:\d+(?:\.\d+)?|\.\d+)\s*%\s*$/.test(value)) {
+                const roundedPercentage = Number(value.replace('%', '')).toFixed(3).replace(/\.?0+$/, '')
+
+                return toJSExpression(`${roundedPercentage}%`)
+            }
+
             return toJSExpression(value.trim())
         default:
             return String(value)

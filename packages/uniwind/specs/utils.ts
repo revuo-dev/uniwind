@@ -1,5 +1,5 @@
 import { mock } from 'bun:test'
-import { RNStyle } from '../src/components/rn/props'
+import { RNStyle } from '../src/core/types'
 import { compileVirtualJS } from '../src/metro/compileVirtualJS'
 import { Platform } from '../src/metro/types'
 import { UniwindRuntimeMock } from './mocks'
