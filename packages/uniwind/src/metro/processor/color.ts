@@ -1,4 +1,4 @@
-import { Color as ColorType, converter, formatHex, formatHex8 } from 'culori'
+import { Color as ColorType, converter, formatHex, formatHex8, parse } from 'culori'
 import { CssColor } from 'lightningcss'
 import { Logger } from '../logger'
 import type { ProcessorBuilder } from './processor'
@@ -13,9 +13,16 @@ export class Color {
     constructor(private readonly Processor: ProcessorBuilder) {}
 
     processColor(color: CssColor) {
-        // System colors
         if (typeof color === 'string') {
-            return this.black
+            const parsed = parse(color)
+
+            if (parsed === undefined) {
+                this.logger.error(`Failed to convert color ${color}`)
+
+                return this.black
+            }
+
+            return this.format(parsed)
         }
 
         try {
@@ -42,8 +49,12 @@ export class Color {
         }
     }
 
+    isColor(value: unknown): value is CssColor {
+        return typeof value === 'string' && parse(value) !== undefined
+    }
+
     private format(color: ColorType) {
-        if (color.alpha === 1) {
+        if (color.alpha === 1 || color.alpha === undefined) {
             return formatHex(color)
         }
 

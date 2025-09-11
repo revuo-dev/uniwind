@@ -119,25 +119,25 @@ describe('Converts tailwind linear gradients', () => {
                 {
                     colorStops: [
                         {
-                            color: 'red',
+                            color: '#ff0000',
                             positions: [
                                 '5%',
                             ],
                         },
                         {
-                            color: 'yellow',
+                            color: '#ffff00',
                             positions: [
                                 '60%',
                             ],
                         },
                         {
-                            color: 'lime',
+                            color: '#00ff00',
                             positions: [
                                 '90%',
                             ],
                         },
                         {
-                            color: 'teal',
+                            color: '#008080',
                             positions: undefined,
                         },
                     ],

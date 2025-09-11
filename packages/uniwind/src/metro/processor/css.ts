@@ -154,6 +154,10 @@ export class CSS {
                 case 'delim':
                     return ` ${declarationValue.value} `
                 case 'ident':
+                    if (this.Processor.Color.isColor(declarationValue.value)) {
+                        return this.Processor.Color.processColor(declarationValue.value)
+                    }
+
                     if (declarationValue.value === 'inset') {
                         return true
                     }
