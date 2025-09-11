@@ -6,7 +6,7 @@ import { Processor } from './processor'
 import { createStylesheetTemplate, createVarsTemplate, serializeStylesheet } from './stylesheet'
 import { Platform } from './types'
 
-export const compileVirtualJS = async (input: string, getCandidates: () => Array<string>, platform: Platform) => {
+export const compileVirtual = async (input: string, getCandidates: () => Array<string>, platform: Platform) => {
     const cssPath = path.join(process.cwd(), input)
     const css = fs.readFileSync(cssPath, 'utf8')
     const compiler = await compile(css, {
@@ -14,6 +14,11 @@ export const compileVirtualJS = async (input: string, getCandidates: () => Array
         onDependency: () => void 0,
     })
     const tailwindCSS = compiler.build(getCandidates())
+
+    if (platform === Platform.Web) {
+        return tailwindCSS
+    }
+
     const stylesheets = {}
 
     transform({

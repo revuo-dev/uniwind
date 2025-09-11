@@ -2,12 +2,12 @@ import { Scanner } from '@tailwindcss/oxide'
 import chokidar, { FSWatcher } from 'chokidar'
 import type { MetroConfig } from 'metro-config'
 import path from 'path'
-import { compileVirtualJS } from './compileVirtualJS'
+import { compileVirtual } from './compileVirtual'
 import { DeepMutable, ExtendedBundler, ExtendedFileSystem, Haste, Platform, UniwindConfig } from './types'
 
-const getVirtualPath = (platform: string) => `${platform}.uniwind.js`
+const getVirtualPath = (platform: string) => `${platform}.uniwind.${platform === Platform.Web ? 'css' : 'js'}`
 
-const platforms = [Platform.iOS, Platform.Android]
+const platforms = [Platform.iOS, Platform.Android, Platform.Web]
 
 export const withUniwind = (
     config: DeepMutable<MetroConfig>,
@@ -50,11 +50,11 @@ export const withUniwind = (
         const resolver = uniwind.originalResolveRequest ?? context.resolveRequest
         const resolved = resolver(context, moduleName, platform)
 
-        if (!('filePath' in resolved && resolved.filePath.endsWith(uniwind.input)) || platform === Platform.Web) {
+        if (!('filePath' in resolved && resolved.filePath.endsWith(uniwind.input))) {
             return resolved
         }
 
-        if (platform !== Platform.iOS && platform !== Platform.Android) {
+        if (platform !== Platform.iOS && platform !== Platform.Android && platform !== Platform.Web) {
             return resolved
         }
 
@@ -112,10 +112,10 @@ export const withUniwind = (
             transformOptions,
             fileBuffer,
         ) => {
-            const virtualJS = uniwind.virtualModules.get(filePath)
+            const virtualFile = uniwind.virtualModules.get(filePath)
 
-            if (virtualJS !== undefined) {
-                fileBuffer = Buffer.from(virtualJS)
+            if (virtualFile !== undefined) {
+                fileBuffer = Buffer.from(virtualFile)
             }
 
             return transformFile(filePath, transformOptions, fileBuffer)
@@ -160,20 +160,20 @@ export const withUniwind = (
             return
         }
 
-        const newJS = await compileVirtualJS(uniwind.input, uniwind.getCandidates, platform)
         const virtualPath = getVirtualPath(platform)
+        const newVirtual = await compileVirtual(uniwind.input, uniwind.getCandidates, platform)
 
-        if (uniwind.virtualModules.get(virtualPath) === newJS) {
+        if (uniwind.virtualModules.get(virtualPath) === newVirtual) {
             return
         }
 
-        uniwind.virtualModules.set(virtualPath, newJS)
+        uniwind.virtualModules.set(virtualPath, newVirtual)
         uniwind.haste.emit('change', {
             eventsQueue: [{
                 filePath: virtualPath,
                 metadata: {
                     modifiedTime: Date.now(),
-                    size: newJS.length,
+                    size: newVirtual.length,
                     type: 'virtual',
                 },
                 type: 'change',

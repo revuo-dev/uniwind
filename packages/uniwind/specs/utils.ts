@@ -1,6 +1,6 @@
 import { mock } from 'bun:test'
 import { RNStyle } from '../src/core/types'
-import { compileVirtualJS } from '../src/metro/compileVirtualJS'
+import { compileVirtual } from '../src/metro/compileVirtual'
 import { Platform } from '../src/metro/types'
 import { UniwindRuntimeMock } from './mocks'
 
@@ -9,7 +9,7 @@ export const getStyleSheetsFromCandidates = async <T extends string>(...candidat
     const testCSSPath = cwd.includes('packages/uniwind')
         ? 'specs/test.css'
         : 'packages/uniwind/specs/test.css'
-    const virtualJS = await compileVirtualJS(
+    const virtualJS = await compileVirtual(
         testCSSPath,
         () => candidates,
         Platform.iOS,
