@@ -1,15 +1,30 @@
 import { Logger } from '../logger'
-import { isNumber, pipe } from '../utils'
+import { isNumber, pipe, smartSplit } from '../utils'
 
 type Stylesheet = Record<string, any>
+
+const FN_DECLARATION = 'function() { return'
 
 const isJSExpression = (value: string) =>
     [
         value.includes('this'),
         value.includes('rt.'),
-        value.includes('() =>'),
+        value.includes('function() {'),
         /\s([-+/*])\s/.test(value),
     ].some(Boolean)
+
+const isValidJSValue = (value: string) => {
+    try {
+        // eslint-disable-next-line @typescript-eslint/no-implied-eval, no-new-func
+        new Function(`const test = ${value}`)
+
+        return true
+    } catch {
+        return false
+    }
+}
+
+const isFunction = (value: string) => /^[A-Za-z][A-Za-z0-9_]*(?:\.[A-Za-z][A-Za-z0-9_]*)*\s*\(.*\)$/.test(value)
 
 const toJSExpression = (value: string): string => {
     if (!isJSExpression(value)) {
@@ -17,31 +32,88 @@ const toJSExpression = (value: string): string => {
             return value
         }
 
+        // Percentage regex, round to 3 decimal places
+        if (/^\s*[+-]?(?:\d+(?:\.\d+)?|\.\d+)\s*%\s*$/.test(value)) {
+            const roundedPercentage = Number(value.replace('%', '')).toFixed(3).replace(/\.?0+$/, '')
+
+            return `"${roundedPercentage}%"`
+        }
+
+        if (isNumber(value)) {
+            return value
+        }
+
         return `"${value.trim()}"`
     }
 
-    if (!value.includes('() =>')) {
+    if (!value.includes(FN_DECLARATION)) {
         return pipe(value)(
-            x => x.split(' '),
-            x => x.map(token => {
-                if (isJSExpression(token) || /[-+/*?(),]/.test(token) || isNumber(token)) {
-                    return token
+            x => {
+                if (isFunction(x)) {
+                    const [fnName] = x.split('(')
+
+                    if (fnName === undefined) {
+                        return x
+                    }
+
+                    const args = pipe(x)(
+                        x => x
+                            .replace(fnName, '')
+                            .replace('(', '')
+                            .slice(0, -1)
+                            .trim(),
+                        smartSplit,
+                        x => x.map(token => {
+                            if (token.endsWith(',')) {
+                                return token.slice(0, -1)
+                            }
+
+                            return token
+                        }),
+                        x => x.map(toJSExpression),
+                    )
+
+                    return [
+                        fnName,
+                        '(',
+                        args.join(','),
+                        ')',
+                    ].join('')
                 }
 
-                return `"${token}"`
-            }),
-            x => x.join(' '),
-            x => x.replace(/" "/g, ' '),
-            x => {
-                // Convert "X, Y, Z" to [X, Y, Z] and serialize it, regex is to exclude functions like Math.max
-                if (x.includes(',') && !x.startsWith('[') && !/^[A-Za-z.]+\(\s+/.test(x)) {
-                    const withArray = x
-                        .replace(' ?? ', '&&&??&&&')
-                        .split(' ')
-                        .map(token => token.replace(',', ''))
-                        .map(token => token.replace('&&&??&&&', ' ?? '))
+                if (!isValidJSValue(x)) {
+                    const tokens = smartSplit(x).map(token => {
+                        if (isNumber(token)) {
+                            return token
+                        }
 
-                    return serialize(withArray)
+                        const parsedToken = pipe(token)(
+                            x => x.replace(',', ''),
+                            x => {
+                                if (x.includes('??')) {
+                                    return x.split(' ?? ').map(toJSExpression).join(' ?? ')
+                                }
+
+                                return toJSExpression(x)
+                            },
+                        )
+
+                        if (parsedToken.startsWith('"')) {
+                            return [
+                                parsedToken.slice(1, -1),
+                                token.includes(',') ? ',' : '',
+                            ].join('')
+                        }
+
+                        return [
+                            '${',
+                            parsedToken,
+                            '}',
+                            token.includes(',') ? ',' : '',
+                        ].join('')
+                    })
+
+                    return `\`${tokens.join(' ')}\``
                 }
 
                 return x
@@ -49,16 +121,16 @@ const toJSExpression = (value: string): string => {
         )
     }
 
-    const [, after] = value.split('() =>')
+    const [, after] = value.split(FN_DECLARATION)
 
     if (after === undefined) {
         return value
     }
 
     try {
-        return `() => ${serialize(JSON.parse(after))}`
+        return `${FN_DECLARATION} ${serialize(JSON.parse(after.replace('}', '')))} }`
     } catch {
-        return `() => ${serialize(after)}`
+        return `${FN_DECLARATION} ${serialize(after.replace('}', ''))} }`
     }
 }
 
@@ -86,13 +158,6 @@ const serialize = (value: any): string => {
             ].join('')
         }
         case 'string':
-            // Percentage regex, round to 3 decimal places
-            if (/^\s*[+-]?(?:\d+(?:\.\d+)?|\.\d+)\s*%\s*$/.test(value)) {
-                const roundedPercentage = Number(value.replace('%', '')).toFixed(3).replace(/\.?0+$/, '')
-
-                return toJSExpression(`${roundedPercentage}%`)
-            }
-
             return toJSExpression(value.trim())
         default:
             return String(value)
@@ -122,7 +187,6 @@ export const serializeStylesheet = (stylesheet: Stylesheet) => {
         new Function(`function validateJS() { ${js} }`)
     } catch {
         Logger.error('Failed to create virtual js')
-
         return ''
     }
 

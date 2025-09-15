@@ -1,5 +1,4 @@
-/* eslint-disable prefer-template */
-import { isDefined, pipe, toCamelCase } from '../utils'
+import { isDefined, percentageToFloat, pipe, toCamelCase } from '../utils'
 import type { ProcessorBuilder } from './processor'
 
 const cssToRNKeyMap = {
@@ -33,7 +32,7 @@ type CornerValues = {
     bottomRight: string
 }
 
-const cssToRNMap: Record<string, (value: any) => unknown> = {
+const cssToRNMap: Record<string, (value: any) => Record<string, any>> = {
     ...Object.fromEntries(
         Object.entries(cssToRNKeyMap).map(([key, transformedKey]) => {
             return [key, value => ({
@@ -41,88 +40,6 @@ const cssToRNMap: Record<string, (value: any) => unknown> = {
             })]
         }),
     ),
-    rotate: (value: any) => {
-        if (Array.isArray(value)) {
-            return {
-                transform: value,
-            }
-        }
-
-        return {
-            transform: [
-                {
-                    rotate: value,
-                },
-            ],
-        }
-    },
-    scale: (value: string) => {
-        const [scaleX, scaleY] = value.split(' ')
-
-        if (scaleY === undefined) {
-            return {
-                transform: [
-                    {
-                        scale: scaleX,
-                    },
-                ],
-            }
-        }
-
-        return {
-            transform: [
-                {
-                    scaleX,
-                },
-                {
-                    scaleY,
-                },
-            ],
-        }
-    },
-    perspective: (value: string) => {
-        return {
-            transform: [
-                {
-                    perspective: value,
-                },
-            ],
-        }
-    },
-    translate: (value: string) => {
-        const [x, y] = value.split(' ')
-        const yValue = y ?? x
-
-        return {
-            transform: [
-                ...isDefined(x)
-                    ? [{
-                        translateX: x,
-                    }]
-                    : [],
-                ...(isDefined(yValue)
-                    ? [{
-                        translateY: yValue,
-                    }]
-                    : []),
-            ],
-        }
-    },
-    boxShadow: () => {
-        return {
-            boxShadow: '['
-                + [
-                    '--tw-inset-shadow',
-                    '--tw-inset-ring-shadow',
-                    '--tw-ring-offset-shadow',
-                    '--tw-ring-shadow',
-                    '--tw-shadow',
-                ]
-                    .map(key => `this[\`${key}\`]`)
-                    .join(', ')
-                + ']',
-        }
-    },
     borderWidth: (value: string | PositionValues) => {
         if (typeof value === 'string') {
             return {
@@ -165,11 +82,6 @@ const cssToRNMap: Record<string, (value: any) => unknown> = {
             flex: value,
         }
     },
-    transform: (value: Array<any>) => {
-        return {
-            transform: value.flat(),
-        }
-    },
     overflow: (value: any) => {
         if (typeof value === 'object') {
             return value
@@ -199,10 +111,62 @@ const cssToRNMap: Record<string, (value: any) => unknown> = {
         experimental_backgroundImage: value,
     }),
     borderSpacing: () => ({}),
-}
+    translate: value => {
+        if (typeof value === 'object' && 'x' in value && 'y' in value) {
+            return {
+                translateX: value.x,
+                translateY: value.y,
+            }
+        }
 
-const percentageToFloat = (value: string) => {
-    return Number(value.replace('%', '')) / 100
+        if (typeof value === 'string') {
+            const [x, y] = value.split(' ')
+
+            return {
+                translateX: x,
+                translateY: y ?? x,
+            }
+        }
+
+        return {}
+    },
+    rotate: value => {
+        if (typeof value === 'object') {
+            return value
+        }
+
+        return {
+            rotate: value,
+        }
+    },
+    scale: value => {
+        if (typeof value === 'object') {
+            return {
+                scaleX: value.x,
+                scaleY: value.y,
+                scaleZ: value.z,
+            }
+        }
+
+        if (typeof value === 'string') {
+            const [x, y, z] = value.split(' ')
+
+            return {
+                scaleX: x,
+                scaleY: y,
+                scaleZ: z,
+            }
+        }
+
+        return {}
+    },
+    transform: value => {
+        if (typeof value === 'object') {
+            return value
+        }
+
+        return {}
+    },
 }
 
 export class RN {
@@ -213,6 +177,7 @@ export class RN {
         const parsedValue = typeof value === 'string'
             ? pipe(value)(
                 x => x.replace(/]this/g, '] this'),
+                x => x.replace(/\](?=\d)/g, '] '),
             )
             : value
 
@@ -222,6 +187,6 @@ export class RN {
 
         const rn = cssToRNMap[transformedProperty]?.(parsedValue) ?? { [transformedProperty]: parsedValue }
 
-        return Object.entries(rn) as Array<[string, any]>
+        return Object.entries(rn).filter(([, value]) => isDefined(value)) as Array<[string, any]>
     }
 }

@@ -1,5 +1,7 @@
 import type {
     Declaration,
+    GradientItemFor_DimensionPercentageFor_LengthValue,
+    LineDirection,
     MathFunctionFor_DimensionPercentageFor_LengthValue,
     MathFunctionFor_Length,
     MediaFeatureValue,
@@ -8,6 +10,7 @@ import type {
     TokenOrValue,
 } from 'lightningcss'
 import type Bundler from 'metro/private/Bundler'
+import { ColorScheme, Orientation } from '../types'
 
 type HasteEventMetadata = {
     modifiedTime: number
@@ -52,6 +55,10 @@ export type UniwindConfig = {
 export type MediaQueryResolver = {
     maxWidth: any
     minWidth: any
+    platform: Platform | null
+    rtl: boolean | null
+    colorScheme: ColorScheme | null
+    orientation: Orientation | null
 }
 
 export const enum Platform {
@@ -73,12 +80,14 @@ export type DeclarationValues =
     | MediaFeatureValue
     | MathFunctionFor_DimensionPercentageFor_LengthValue
     | MathFunctionFor_Length
+    | LineDirection
+    | GradientItemFor_DimensionPercentageFor_LengthValue
 
 export type ProcessMetaValues = {
     propertyName?: string
     className?: string
 }
 
-export type StylesTemplate = {
-    [K: string]: MediaQueryResolver & Record<string, unknown>
+export type StyleSheetTemplate = {
+    [K: string]: Array<MediaQueryResolver & Record<string, unknown>>
 }

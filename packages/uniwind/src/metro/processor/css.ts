@@ -1,7 +1,7 @@
 import { BackgroundPosition, Declaration, OverflowKeyword } from 'lightningcss'
 import { Logger } from '../logger'
 import { DeclarationValues, ProcessMetaValues } from '../types'
-import { pipe } from '../utils'
+import { isDefined, pipe } from '../utils'
 import type { ProcessorBuilder } from './processor'
 
 export class CSS {
@@ -40,10 +40,6 @@ export class CSS {
     }
 
     processValue(declarationValue: DeclarationValues, meta = {} as ProcessMetaValues): any {
-        if (meta.propertyName !== undefined && this.Processor.Shadow.isShadowKey(meta.propertyName)) {
-            return this.Processor.Shadow.processShadow(declarationValue)
-        }
-
         if (typeof declarationValue !== 'object') {
             return declarationValue
         }
@@ -158,10 +154,6 @@ export class CSS {
                         return this.Processor.Color.processColor(declarationValue.value)
                     }
 
-                    if (declarationValue.value === 'inset') {
-                        return true
-                    }
-
                     if (declarationValue.value === 'currentcolor') {
                         return 'this["currentColor"]'
                     }
@@ -176,7 +168,7 @@ export class CSS {
 
                     this.logger.error(`Unsupported env value - ${JSON.stringify(declarationValue.value)}`)
 
-                    return declarationValue.value
+                    return ''
                 case 'time': {
                     const unit = declarationValue.value.type === 'milliseconds' ? 'ms' : 's'
 
@@ -213,7 +205,7 @@ export class CSS {
 
                     this.logger.error(`Unsupported keyword value - ${JSON.stringify(declarationValue)}`)
 
-                    return declarationValue.type
+                    return ''
                 case 'min-max':
                 case 'track-breadth':
                     return declarationValue.type
@@ -221,6 +213,24 @@ export class CSS {
                     return `${this.processValue(declarationValue.width)} ${this.processValue(declarationValue.height)}`
                 case 'angle':
                     return `${declarationValue.value.value}${declarationValue.value.type}`
+                case 'gradient':
+                    if (declarationValue.value.type === 'linear') {
+                        const direction = String(this.processValue(declarationValue.value.direction))
+
+                        return [
+                            direction.includes('deg') ? direction : `to ${direction}`,
+                            ...declarationValue.value.items.map(item => this.processValue(item)),
+                        ].join(', ')
+                    }
+
+                    return ''
+                case 'color-stop':
+                    return [
+                        this.Processor.Color.processColor(declarationValue.color),
+                        declarationValue.position ? this.processValue(declarationValue.position) : null,
+                    ].filter(isDefined).join(' ')
+                case 'horizontal':
+                case 'vertical':
                 case 'white-space':
                 case 'string':
                 case 'self-position':
@@ -235,7 +245,7 @@ export class CSS {
 
                     this.logger.error(`Unsupported value type - ${declarationValue.type}`)
 
-                    return declarationValue.type
+                    return ''
             }
         }
 
@@ -267,8 +277,8 @@ export class CSS {
 
         if (Array.isArray(declarationValue)) {
             switch (meta.propertyName) {
-                case 'transform':
-                    return declarationValue.reduce<Array<any>>((acc, value) => {
+                case 'transform': {
+                    const transforms = declarationValue.reduce<Array<any>>((acc, value) => {
                         if (typeof value === 'object') {
                             const result = this.processValue(value)
 
@@ -281,8 +291,15 @@ export class CSS {
 
                         return acc
                     }, [])
+
+                    const transformsEntries = transforms
+                        .flatMap(transform => typeof transform === 'object' ? Object.entries(transform) : null)
+                        .filter(isDefined)
+
+                    return Object.fromEntries(transformsEntries)
+                }
                 default:
-                    return declarationValue.reduce<string | number>((acc, value, index, array) => {
+                    return this.addComaBetweenTokens(declarationValue).reduce<string | number>((acc, value, index, array) => {
                         if (typeof value === 'object') {
                             const nextValue = array.at(index + 1)
 
@@ -322,7 +339,8 @@ export class CSS {
                 ['rotateZ', declarationValue.z * declarationValue.angle.value],
             ])(
                 x => x.filter(([, value]) => value !== 0),
-                x => x.map(([key, value]) => ({ [String(key)]: `${value}${declarationValue.angle.type}` })),
+                x => x.map(([key, value]) => [key, `${value}${declarationValue.angle.type}`]),
+                Object.fromEntries,
             )
 
             return angles
@@ -351,6 +369,25 @@ export class CSS {
             return ''
         }
 
+        if ('x' in declarationValue && 'y' in declarationValue) {
+            return {
+                x: this.processValue(declarationValue.x),
+                y: this.processValue(declarationValue.y),
+            }
+        }
+
+        // Shadows
+        if ('xOffset' in declarationValue) {
+            return [
+                'inset' in declarationValue && declarationValue.inset ? 'inset' : undefined,
+                this.processValue(declarationValue.xOffset),
+                this.processValue(declarationValue.yOffset),
+                this.processValue(declarationValue.blur),
+                this.processValue(declarationValue.spread),
+                this.processValue(declarationValue.color),
+            ].filter(isDefined).join(' ')
+        }
+
         this.logger.error(
             [
                 `Unsupported value ${JSON.stringify(declarationValue)}`,
@@ -359,7 +396,7 @@ export class CSS {
             ].filter(Boolean).join(' '),
         )
 
-        return declarationValue
+        return ''
     }
 
     private isDimension(value: any): value is { type: 'dimension' } {
@@ -372,5 +409,38 @@ export class CSS {
 
     private isBackgroundPosition(value: any): value is BackgroundPosition {
         return typeof value === 'object' && 'x' in value && 'y' in value && Object.keys(value).length === 2
+    }
+
+    /**
+     * Between some tokens there isn't a comma but it should be.
+     * For example this applies to Array of shadows
+     */
+    private addComaBetweenTokens(values: Array<DeclarationValues>) {
+        return values.reduce<Array<any>>((acc, value, index, array) => {
+            const next = array.at(index + 1)
+
+            acc.push(value)
+
+            if (next === undefined) {
+                return acc
+            }
+
+            if (typeof next === 'object' && 'type' in next && next.type === 'token' && next.value.type === 'comma') {
+                return acc
+            }
+
+            if (!(typeof value === 'object' && 'xOffset' in value && 'blur' in value)) {
+                return acc
+            }
+
+            acc.push({
+                type: 'token',
+                value: {
+                    type: 'comma',
+                },
+            })
+
+            return acc
+        }, [])
     }
 }
