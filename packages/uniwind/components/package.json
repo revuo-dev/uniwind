@@ -1,4 +1,5 @@
 {
-    "main": "../dist/components/common/index.js",
-    "module": "../dist/components/module/index.js"
+    "react-native": "../dist/common/components/index.native.js",
+    "main": "../dist/common/components/index.js",
+    "module": "../dist/module/components/index.js"
 }

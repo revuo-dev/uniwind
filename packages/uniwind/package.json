@@ -1,7 +1,7 @@
 {
     "private": false,
     "name": "uniwind",
-    "version": "1.0.0-alpha-1",
+    "version": "1.0.0-alpha-2",
     "description": "The fastest Tailwind bindings for React Native",
     "homepage": "https://github.com/Unistyles-OSS/uniwind",
     "author": "UnistylesOSS",
@@ -24,14 +24,15 @@
     "exports": {
         ".": {
             "style": "./uniwind.css",
+            "react-native": "./dist/common/index.js",
             "import": "./dist/module/index.js",
-            "react-native": "./src/index.ts",
             "types": "./dist/module/index.d.ts",
             "default": "./dist/common/index.js"
         },
         "./components/*": {
-            "import": "./dist/components/module/index.js",
-            "default": "./dist/components/common/index.js"
+            "react-native": "./dist/common/components/index.native.js",
+            "import": "./dist/module/components/index.js",
+            "default": "./dist/common/components/index.js"
         },
         "./babel": "./dist/babel/index.cjs",
         "./metro": "./dist/metro/index.cjs",
@@ -40,7 +41,6 @@
     },
     "files": [
         "dist",
-        "src",
         "metro",
         "components",
         "babel",
@@ -50,6 +50,7 @@
     ],
     "dependencies": {
         "@tailwindcss/node": "4.1.13",
+        "@tailwindcss/oxide": "4.1.13",
         "chokidar": "4.0.3",
         "culori": "4.0.2"
     },

@@ -12,19 +12,27 @@ const getConfig = (config: Config) =>
         {
             builder: 'mkdist',
             input: config.input,
-            outDir: `${config.outDir}/common`,
+            outDir: `dist/common/${config.outDir}`,
             ext: 'js',
             format: 'cjs',
             pattern: config.pattern,
+            esbuild: {
+                jsx: 'automatic',
+                jsxImportSource: 'react',
+            },
         },
         {
             builder: 'mkdist',
             input: config.input,
-            outDir: `${config.outDir}/module`,
+            outDir: `dist/module/${config.outDir}`,
             ext: 'js',
             format: 'esm',
             pattern: config.pattern,
             declaration: config.declaration,
+            esbuild: {
+                jsx: 'automatic',
+                jsxImportSource: 'react',
+            },
         },
     ] satisfies Array<BuildConfig['entries'][number]>
 
@@ -42,11 +50,11 @@ export default defineBuildConfig({
         },
         ...getConfig({
             input: './src/components',
-            outDir: 'dist/components',
+            outDir: 'components',
         }),
         ...getConfig({
             input: './src',
-            outDir: 'dist',
+            outDir: '',
             pattern: [
                 '**/*',
                 '!babel/**',
