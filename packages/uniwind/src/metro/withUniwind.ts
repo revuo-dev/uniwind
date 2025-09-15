@@ -1,9 +1,10 @@
 import { Scanner } from '@tailwindcss/oxide'
 import chokidar, { FSWatcher } from 'chokidar'
+import type EventEmitter from 'events'
 import type { MetroConfig } from 'metro-config'
 import path from 'path'
 import { compileVirtual } from './compileVirtual'
-import { DeepMutable, ExtendedBundler, ExtendedFileSystem, Haste, Platform, UniwindConfig } from './types'
+import { DeepMutable, ExtendedBundler, ExtendedFileSystem, Platform, UniwindConfig } from './types'
 
 const getVirtualPath = (platform: string) => `${platform}.uniwind.${platform === Platform.Web ? 'css' : 'js'}`
 
@@ -19,7 +20,7 @@ export const withUniwind = (
         input,
         originalResolveRequest: config.resolver?.resolveRequest,
         originalGetTransformOptions: config.transformer?.getTransformOptions,
-        haste: null as Haste | null,
+        watcher: null as EventEmitter | null,
         virtualModulesPossible: new Promise<void>(() => void 0),
         globalWatcher: null as FSWatcher | null,
         virtualModules: new Map<string, string>(),
@@ -70,8 +71,7 @@ export const withUniwind = (
         uniwind.virtualModulesPossible = bundler
             .getDependencyGraph()
             .then(async graph => {
-                // @ts-expect-error Hidden property
-                uniwind.haste = graph._haste
+                uniwind.watcher = bundler.getWatcher()
                 // @ts-expect-error Hidden property
                 ensureFileSystemPatched(graph._fileSystem)
                 ensureBundlerPatched(bundler)
@@ -156,7 +156,7 @@ export const withUniwind = (
     }
 
     const recreateStylesheets = async (platform: Platform) => {
-        if (!uniwind.haste) {
+        if (!uniwind.watcher) {
             return
         }
 
@@ -168,7 +168,7 @@ export const withUniwind = (
         }
 
         uniwind.virtualModules.set(virtualPath, newVirtual)
-        uniwind.haste.emit('change', {
+        uniwind.watcher.emit('change', {
             eventsQueue: [{
                 filePath: virtualPath,
                 metadata: {

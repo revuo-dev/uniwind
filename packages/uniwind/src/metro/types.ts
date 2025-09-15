@@ -12,26 +12,6 @@ import type {
 import type Bundler from 'metro/private/Bundler'
 import { ColorScheme, Orientation } from '../types'
 
-type HasteEventMetadata = {
-    modifiedTime: number
-    size: number
-    type: 'virtual'
-}
-
-type HasteEvent = {
-    filePath: string
-    metadata: HasteEventMetadata
-    type: 'change'
-}
-
-type HasteEventData = {
-    eventsQueue: Array<HasteEvent>
-}
-
-export type Haste = {
-    emit: (event: string, data: HasteEventData) => void
-}
-
 type WithUniwindPatch<T> = T & {
     __uniwind_patched?: boolean
 }
