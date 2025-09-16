@@ -1,4 +1,5 @@
-import { StyleDependency } from '../types'
+import { Appearance, Dimensions } from 'react-native'
+import { ColorScheme, Orientation, StyleDependency } from '../types'
 import { resolveGradient } from './gradient'
 import { listenToNativeUpdates } from './nativeListener'
 import { parseBoxShadow, parseTransformsMutation } from './parsers'
@@ -53,10 +54,14 @@ export class UniwindStoreBuilder {
 
     reload = () => {
         this.stylesheets = globalThis.__uniwind__computeStylesheet(this.runtime)
+    }
+
+    notifyListeners = () => {
         this.listeners.forEach(listener => listener())
     }
 
     private resolveStyles(styles: Array<[string, Style]>) {
+        const dependencies = [] as Array<StyleDependency>
         const filteredStyles = styles.filter(([, style]) => {
             if (
                 style.minWidth > this.runtime.screen.width
@@ -70,18 +75,17 @@ export class UniwindStoreBuilder {
 
             return true
         })
-
         const bestBreakpoints = new Map<string, Style>()
         const result = {} as Record<string, any>
         const inlineVariables = new Map<string, () => any>()
-        const dependencies = [] as Array<StyleDependency>
         const usingVariables = new Map<string, Style>()
 
         filteredStyles.forEach(([, style]) => {
             style.inlineVariables.forEach(([varName, varValue]) => {
                 const previousBest = bestBreakpoints.get(varName)
 
-                if (previousBest && previousBest.minWidth > style.minWidth || previousBest?.importantProperties.includes(varName)) {
+                // TODO: Resolve using properties complexity
+                if (previousBest && previousBest.minWidth >= style.minWidth || previousBest?.importantProperties.includes(varName)) {
                     return
                 }
 
@@ -92,13 +96,14 @@ export class UniwindStoreBuilder {
             style.entries.forEach(([property, value]) => {
                 const previousBest = bestBreakpoints.get(property)
 
-                if (previousBest && previousBest.minWidth > style.minWidth || previousBest?.importantProperties.includes(property)) {
+                // TODO: Resolve using properties complexity
+                if (previousBest && previousBest.minWidth >= style.minWidth || previousBest?.importantProperties.includes(property)) {
                     return
                 }
 
                 bestBreakpoints.set(property, style)
-
                 result[property] = value
+                dependencies.push(...style.dependencies)
 
                 if (property in style.stylesUsingVariables) {
                     usingVariables.set(property, style)
@@ -155,3 +160,17 @@ if (__DEV__) {
         UniwindStore.reload()
     }
 }
+
+Dimensions.addEventListener('change', ({ window }) => {
+    UniwindStore.runtime.screen = {
+        width: window.width,
+        height: window.height,
+    }
+    UniwindStore.runtime.orientation = window.width > window.height ? Orientation.Landscape : Orientation.Portrait
+    UniwindStore.notifyListeners()
+})
+
+Appearance.addChangeListener(({ colorScheme }) => {
+    UniwindStore.runtime.colorScheme = (colorScheme ?? ColorScheme.Light) as ColorScheme
+    UniwindStore.notifyListeners()
+})

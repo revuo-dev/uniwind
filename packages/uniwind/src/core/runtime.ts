@@ -24,16 +24,3 @@ export const UniwindRuntime = {
         return formatHex(interpolate([mixColor, color])(weight))
     },
 } as UniwindRuntimeType
-
-Dimensions.addEventListener('change', ({ window }) => {
-    UniwindRuntime.screen = {
-        width: window.width,
-        height: window.height,
-    }
-
-    UniwindRuntime.orientation = window.width > window.height ? Orientation.Landscape : Orientation.Portrait
-})
-
-Appearance.addChangeListener(({ colorScheme }) => {
-    UniwindRuntime.colorScheme = (colorScheme ?? ColorScheme.Light) as ColorScheme
-})

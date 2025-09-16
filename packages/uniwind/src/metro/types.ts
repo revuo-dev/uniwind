@@ -73,3 +73,13 @@ export type ProcessMetaValues = {
 export type StyleSheetTemplate = {
     [K: string]: Array<MediaQueryResolver & Record<string, unknown>>
 }
+
+type FileChange = {
+    filePath: string
+    type: string
+    metadata: any
+}
+
+export type FileChangeEvent = {
+    eventsQueue: Array<FileChange>
+}

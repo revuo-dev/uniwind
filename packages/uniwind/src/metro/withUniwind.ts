@@ -1,12 +1,16 @@
 import { Scanner } from '@tailwindcss/oxide'
-import chokidar, { FSWatcher } from 'chokidar'
 import type EventEmitter from 'events'
 import type { MetroConfig } from 'metro-config'
 import path from 'path'
 import { compileVirtual } from './compileVirtual'
-import { DeepMutable, ExtendedBundler, ExtendedFileSystem, Platform, UniwindConfig } from './types'
+import { DeepMutable, ExtendedBundler, ExtendedFileSystem, FileChangeEvent, Platform, UniwindConfig } from './types'
 
 const getVirtualPath = (platform: string) => `${platform}.uniwind.${platform === Platform.Web ? 'css' : 'js'}`
+const getPlatformFromVirtualPath = (path: string) => {
+    const [, platform] = path.match(/^(\w+)\.uniwind\./) ?? []
+
+    return platform as Platform | undefined
+}
 
 const platforms = [Platform.iOS, Platform.Android, Platform.Web]
 
@@ -22,7 +26,6 @@ export const withUniwind = (
         originalGetTransformOptions: config.transformer?.getTransformOptions,
         watcher: null as EventEmitter | null,
         virtualModulesPossible: new Promise<void>(() => void 0),
-        globalWatcher: null as FSWatcher | null,
         virtualModules: new Map<string, string>(),
         getCandidates: () =>
             new Scanner({
@@ -51,7 +54,7 @@ export const withUniwind = (
         const resolver = uniwind.originalResolveRequest ?? context.resolveRequest
         const resolved = resolver(context, moduleName, platform)
 
-        if (!('filePath' in resolved && resolved.filePath.endsWith(uniwind.input))) {
+        if (('filePath' in resolved && resolved.filePath !== path.join(process.cwd(), uniwind.input))) {
             return resolved
         }
 
@@ -75,9 +78,51 @@ export const withUniwind = (
                 // @ts-expect-error Hidden property
                 ensureFileSystemPatched(graph._fileSystem)
                 ensureBundlerPatched(bundler)
-                setupGlobalWatcher()
 
-                await Promise.all(platforms.map(recreateStylesheets))
+                uniwind.watcher.on('change', (event: FileChangeEvent) => {
+                    if ('eventsQueue' in event) {
+                        const shouldEmitChange = event.eventsQueue.reduce<null | boolean>((acc, event) => {
+                            if (acc === false) {
+                                return acc
+                            }
+
+                            const isJSFile = ['.js', '.jsx', '.ts', '.tsx', '.css'].some(ext => event.filePath.endsWith(ext))
+
+                            if (isJSFile) {
+                                const platform = getPlatformFromVirtualPath(event.filePath)
+
+                                if (platform) {
+                                    return false
+                                }
+
+                                return true
+                            }
+
+                            return acc
+                        }, null)
+
+                        if (shouldEmitChange) {
+                            platforms.forEach(platform => {
+                                uniwind.watcher?.emit(
+                                    'change',
+                                    {
+                                        eventsQueue: [{
+                                            filePath: getVirtualPath(platform),
+                                            metadata: {
+                                                modifiedTime: Date.now(),
+                                                size: 1,
+                                                type: 'virtual',
+                                            },
+                                            type: 'change',
+                                        }],
+                                    } satisfies FileChangeEvent,
+                                )
+                            })
+                        }
+                    }
+                })
+
+                await Promise.all(platforms.map(getVirtualFile))
             })
 
         return middleware
@@ -112,10 +157,16 @@ export const withUniwind = (
             transformOptions,
             fileBuffer,
         ) => {
-            const virtualFile = uniwind.virtualModules.get(filePath)
+            const isVirtualFile = uniwind.virtualModules.has(filePath)
 
-            if (virtualFile !== undefined) {
-                fileBuffer = Buffer.from(virtualFile)
+            if (isVirtualFile) {
+                const platform = getPlatformFromVirtualPath(filePath)
+
+                if (platform) {
+                    const virtualFile = await getVirtualFile(platform)
+
+                    fileBuffer = Buffer.from(virtualFile)
+                }
             }
 
             return transformFile(filePath, transformOptions, fileBuffer)
@@ -124,68 +175,18 @@ export const withUniwind = (
         bundler.transformFile.__uniwind_patched = true
     }
 
-    const setupGlobalWatcher = () => {
-        if (uniwind.globalWatcher) {
-            uniwind.globalWatcher.close()
-        }
-
-        const filesToWatch = [
-            path.join(process.cwd(), uniwind.input),
-            path.join(process.cwd(), '**/*.ts'),
-            path.join(process.cwd(), '**/*.tsx'),
-            path.join(process.cwd(), '**/*.js'),
-            path.join(process.cwd(), '**/*.jsx'),
-        ]
-
-        uniwind.globalWatcher = chokidar.watch(filesToWatch, {
-            ignoreInitial: true,
-            persistent: true,
-        })
-
-        uniwind.globalWatcher.on('all', () => {
-            platforms.forEach(platform => {
-                recreateStylesheets(platform)
-            })
-        })
-
-        uniwind.globalWatcher.on('raw', () => {
-            platforms.forEach(platform => {
-                recreateStylesheets(platform)
-            })
-        })
-    }
-
-    const recreateStylesheets = async (platform: Platform) => {
-        if (!uniwind.watcher) {
-            return
-        }
-
+    const getVirtualFile = async (platform: Platform) => {
         const virtualPath = getVirtualPath(platform)
         const newVirtual = await compileVirtual(uniwind.input, uniwind.getCandidates, platform)
 
         if (uniwind.virtualModules.get(virtualPath) === newVirtual) {
-            return
+            return newVirtual
         }
 
         uniwind.virtualModules.set(virtualPath, newVirtual)
-        uniwind.watcher.emit('change', {
-            eventsQueue: [{
-                filePath: virtualPath,
-                metadata: {
-                    modifiedTime: Date.now(),
-                    size: newVirtual.length,
-                    type: 'virtual',
-                },
-                type: 'change',
-            }],
-        })
-    }
 
-    process.on('exit', () => {
-        if (uniwind.globalWatcher) {
-            uniwind.globalWatcher.close()
-        }
-    })
+        return newVirtual
+    }
 
     return config
 }
