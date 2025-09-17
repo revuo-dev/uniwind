@@ -1,9 +1,11 @@
 import { Scanner } from '@tailwindcss/oxide'
 import type EventEmitter from 'events'
+import fs from 'fs'
 import type { MetroConfig } from 'metro-config'
 import path from 'path'
 import { compileVirtual } from './compileVirtual'
 import { DeepMutable, ExtendedBundler, ExtendedFileSystem, FileChangeEvent, Platform, UniwindConfig } from './types'
+import { areSetsEqual } from './utils'
 
 const getVirtualPath = (platform: string) => `${platform}.uniwind.${platform === Platform.Web ? 'css' : 'js'}`
 const getPlatformFromVirtualPath = (path: string) => {
@@ -16,15 +18,17 @@ const platforms = [Platform.iOS, Platform.Android, Platform.Web]
 
 export const withUniwind = (
     config: DeepMutable<MetroConfig>,
-    { input }: UniwindConfig,
+    uniwindConfig: UniwindConfig,
 ) => {
     const uniwind = {
-        input,
+        input: path.join(process.cwd(), uniwindConfig.input),
         originalResolveRequest: config.resolver?.resolveRequest,
         originalGetTransformOptions: config.transformer?.getTransformOptions,
         watcher: null as EventEmitter | null,
         virtualModulesPossible: new Promise<void>(() => void 0),
         virtualModules: new Map<string, string>(),
+        candidates: new Set<string>(),
+        cssFile: '',
         getCandidates: () =>
             new Scanner({
                 sources: [
@@ -52,7 +56,7 @@ export const withUniwind = (
         const resolver = uniwind.originalResolveRequest ?? context.resolveRequest
         const resolved = resolver(context, moduleName, platform)
 
-        if (('filePath' in resolved && resolved.filePath !== path.join(process.cwd(), uniwind.input))) {
+        if (('filePath' in resolved && resolved.filePath !== path.join(process.cwd(), uniwindConfig.input))) {
             return resolved
         }
 
@@ -79,46 +83,46 @@ export const withUniwind = (
 
                 uniwind.watcher.on('change', (event: FileChangeEvent) => {
                     if ('eventsQueue' in event) {
-                        const shouldEmitChange = event.eventsQueue.reduce<null | boolean>((acc, event) => {
-                            if (acc === false) {
-                                return acc
-                            }
-
-                            const isJSFile = ['.js', '.jsx', '.ts', '.tsx', '.css'].some(ext => event.filePath.endsWith(ext))
-
-                            if (isJSFile) {
-                                const platform = getPlatformFromVirtualPath(event.filePath)
-
-                                if (platform) {
-                                    return false
-                                }
-
-                                return true
-                            }
-
-                            return acc
-                        }, null)
-
-                        if (shouldEmitChange) {
-                            platforms.forEach(platform => {
-                                uniwind.watcher?.emit(
-                                    'change',
-                                    {
-                                        eventsQueue: [{
-                                            filePath: getVirtualPath(platform),
-                                            metadata: {
-                                                modifiedTime: Date.now(),
-                                                size: 1,
-                                                type: 'virtual',
-                                            },
-                                            type: 'change',
-                                        }],
-                                    } satisfies FileChangeEvent,
-                                )
+                        if (
+                            // Listen only to changes in JS/TS/css files
+                            !event.eventsQueue.some(event => {
+                                return ['.js', '.jsx', '.ts', '.tsx', '.css'].some(ext => event.filePath.endsWith(ext))
                             })
+                        ) {
+                            return
                         }
+
+                        const css = fs.readFileSync(uniwind.input, 'utf-8')
+                        const candidates = new Set(uniwind.getCandidates())
+                        const tailwindHasChanged = css !== uniwind.cssFile || !areSetsEqual(uniwind.candidates, candidates)
+
+                        if (!tailwindHasChanged) {
+                            return
+                        }
+
+                        uniwind.cssFile = css
+                        uniwind.candidates = candidates
+                        platforms.forEach(platform => {
+                            uniwind.watcher?.emit(
+                                'change',
+                                {
+                                    eventsQueue: [{
+                                        filePath: getVirtualPath(platform),
+                                        metadata: {
+                                            modifiedTime: Date.now(),
+                                            size: 1,
+                                            type: 'virtual',
+                                        },
+                                        type: 'change',
+                                    }],
+                                } satisfies FileChangeEvent,
+                            )
+                        })
                     }
                 })
+
+                uniwind.cssFile = fs.readFileSync(uniwind.input, 'utf-8')
+                uniwind.candidates = new Set(uniwind.getCandidates())
 
                 await Promise.all(platforms.map(getVirtualFile))
             })
@@ -174,16 +178,16 @@ export const withUniwind = (
     }
 
     const getVirtualFile = async (platform: Platform) => {
-        const virtualPath = getVirtualPath(platform)
-        const newVirtual = await compileVirtual(uniwind.input, uniwind.getCandidates, platform)
+        const virtualFile = await compileVirtual({
+            candidates: Array.from(uniwind.candidates),
+            cssPath: uniwind.input,
+            css: uniwind.cssFile,
+            platform,
+        })
 
-        if (uniwind.virtualModules.get(virtualPath) === newVirtual) {
-            return newVirtual
-        }
+        uniwind.virtualModules.set(getVirtualPath(platform), virtualFile)
 
-        uniwind.virtualModules.set(virtualPath, newVirtual)
-
-        return newVirtual
+        return virtualFile
     }
 
     return config

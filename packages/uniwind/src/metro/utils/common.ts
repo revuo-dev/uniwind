@@ -43,3 +43,17 @@ export const smartSplit = (str: string) => {
 export const percentageToFloat = (value: string) => {
     return Number(value.replace('%', '')) / 100
 }
+
+export const areSetsEqual = <T>(a: Set<T>, b: Set<T>) => {
+    if (a.size !== b.size) {
+        return false
+    }
+
+    for (const item of a) {
+        if (!b.has(item)) {
+            return false
+        }
+    }
+
+    return true
+}

@@ -1,19 +1,21 @@
 import { mock } from 'bun:test'
+import { readFileSync } from 'fs'
 import { RNStyle } from '../src/core/types'
 import { compileVirtual } from '../src/metro/compileVirtual'
 import { Platform } from '../src/metro/types'
 import { UniwindRuntimeMock } from './mocks'
+import path = require('path')
 
 export const getStyleSheetsFromCandidates = async <T extends string>(...candidates: Array<T>) => {
     const cwd = process.cwd()
-    const testCSSPath = cwd.includes('packages/uniwind')
-        ? 'specs/test.css'
-        : 'packages/uniwind/specs/test.css'
-    const virtualJS = await compileVirtual(
-        testCSSPath,
-        () => candidates,
-        Platform.iOS,
-    )
+    const testCSSPath = path.join(cwd, cwd.includes('packages/uniwind') ? '' : 'packages/uniwind', '/specs/test.css')
+    const css = readFileSync(testCSSPath, 'utf-8')
+    const virtualJS = await compileVirtual({
+        css,
+        candidates,
+        platform: Platform.iOS,
+        cssPath: testCSSPath,
+    })
 
     new Function(virtualJS)()
 

@@ -1,18 +1,21 @@
 import { compile } from '@tailwindcss/node'
-import fs from 'fs'
-import path from 'path'
 import { ProcessorBuilder } from './processor'
 import { addMetaToStylesTemplate, serializeStylesheet } from './stylesheet'
 import { Platform } from './types'
 
-export const compileVirtual = async (input: string, getCandidates: () => Array<string>, platform: Platform) => {
-    const cssPath = path.join(process.cwd(), input)
-    const css = fs.readFileSync(cssPath, 'utf8')
+type CompileVirtualConfig = {
+    cssPath: string
+    css: string
+    candidates: Array<string>
+    platform: Platform
+}
+
+export const compileVirtual = async ({ candidates, css, cssPath, platform }: CompileVirtualConfig) => {
     const compiler = await compile(css, {
         base: cssPath,
         onDependency: () => void 0,
     })
-    const tailwindCSS = compiler.build(getCandidates())
+    const tailwindCSS = compiler.build(candidates)
 
     if (platform === Platform.Web) {
         return tailwindCSS
