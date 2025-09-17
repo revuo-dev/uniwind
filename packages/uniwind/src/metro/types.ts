@@ -29,7 +29,7 @@ export type DeepMutable<T> = {
 }
 
 export type UniwindConfig = {
-    input?: string
+    input: string
 }
 
 export type MediaQueryResolver = {

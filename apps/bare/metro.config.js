@@ -27,4 +27,4 @@ const config = {
     },
 }
 
-module.exports = withUniwind(mergeConfig(getDefaultConfig(__dirname), config))
+module.exports = withUniwind(mergeConfig(getDefaultConfig(__dirname), config), { input: 'global.css' })

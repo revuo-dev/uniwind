@@ -16,9 +16,7 @@ const platforms = [Platform.iOS, Platform.Android, Platform.Web]
 
 export const withUniwind = (
     config: DeepMutable<MetroConfig>,
-    {
-        input = 'global.css',
-    } = {} as UniwindConfig,
+    { input }: UniwindConfig,
 ) => {
     const uniwind = {
         input,

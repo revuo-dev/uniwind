@@ -35,7 +35,11 @@
             "default": "./dist/common/components/index.js"
         },
         "./babel": "./dist/babel/index.cjs",
-        "./metro": "./dist/metro/index.cjs",
+        "./metro": {
+            "types": "./dist/metro/index.d.ts",
+            "import": "./dist/metro/index.mjs",
+            "default": "./dist/metro/index.cjs"
+        },
         "./types": "./types.d.ts",
         "./package.json": "./package.json"
     },

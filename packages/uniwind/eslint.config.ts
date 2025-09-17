@@ -23,6 +23,7 @@ export default [
             'eslint.config.ts',
             'build.config.ts',
             'types.d.ts',
+            'src/metro/index.d.ts',
             'dist',
             'specs',
         ],

@@ -44,6 +44,14 @@ export default defineBuildConfig({
             name: 'metro/index',
         },
         {
+            builder: 'mkdist',
+            input: './src/metro',
+            outDir: 'dist/metro',
+            pattern: ['index.d.ts'],
+            declaration: true,
+            format: 'esm',
+        },
+        {
             builder: 'rollup',
             input: './src/babel',
             name: 'babel/index',
