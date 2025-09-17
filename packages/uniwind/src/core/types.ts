@@ -15,6 +15,7 @@ export type Style = {
     index: number
     className: string
     importantProperties: Array<string>
+    complexity: number
 }
 
 export type StyleSheets = Record<string, Array<Style>>

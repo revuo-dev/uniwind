@@ -92,6 +92,13 @@ export const addMetaToStylesTemplate = (Processor: ProcessorBuilder, currentPlat
                     index,
                     className,
                     importantProperties: importantProperties?.map(property => property.startsWith('--') ? property : toCamelCase) ?? [],
+                    complexity: [
+                        minWidth !== 0,
+                        colorScheme !== null,
+                        orientation !== null,
+                        rtl !== null,
+                        platform !== null,
+                    ].filter(Boolean).length,
                 }
             })
 

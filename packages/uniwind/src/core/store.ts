@@ -84,8 +84,14 @@ export class UniwindStoreBuilder {
             style.inlineVariables.forEach(([varName, varValue]) => {
                 const previousBest = bestBreakpoints.get(varName)
 
-                // TODO: Resolve using properties complexity
-                if (previousBest && previousBest.minWidth >= style.minWidth || previousBest?.importantProperties.includes(varName)) {
+                if (
+                    previousBest
+                    && (
+                        previousBest.minWidth > style.minWidth
+                        || previousBest.complexity > style.complexity
+                        || previousBest.importantProperties.includes(varName)
+                    )
+                ) {
                     return
                 }
 
@@ -96,8 +102,14 @@ export class UniwindStoreBuilder {
             style.entries.forEach(([property, value]) => {
                 const previousBest = bestBreakpoints.get(property)
 
-                // TODO: Resolve using properties complexity
-                if (previousBest && previousBest.minWidth >= style.minWidth || previousBest?.importantProperties.includes(property)) {
+                if (
+                    previousBest
+                    && (
+                        previousBest.minWidth > style.minWidth
+                        || previousBest.complexity > style.complexity
+                        || previousBest.importantProperties.includes(property)
+                    )
+                ) {
                     return
                 }
 
