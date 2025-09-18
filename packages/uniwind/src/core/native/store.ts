@@ -1,10 +1,8 @@
 import { Appearance, Dimensions } from 'react-native'
-import { ColorScheme, Orientation, StyleDependency } from '../types'
-import { resolveGradient } from './gradient'
-import { listenToNativeUpdates } from './nativeListener'
-import { parseBoxShadow, parseTransformsMutation } from './parsers'
+import { ColorScheme, Orientation, StyleDependency } from '../../types'
+import { RNStyle, Style, StyleSheets } from '../types'
+import { parseBoxShadow, parseTransformsMutation, resolveGradient } from './parsers'
 import { UniwindRuntime } from './runtime'
-import { RNStyle, Style, StyleSheets } from './types'
 
 export class UniwindStoreBuilder {
     stylesheets = {} as StyleSheets
@@ -13,13 +11,12 @@ export class UniwindStoreBuilder {
     runtime = UniwindRuntime
 
     subscribe(onStoreChange: () => void, dependencies: Array<StyleDependency>) {
-        const dispose = listenToNativeUpdates(onStoreChange, dependencies)
-
         this.listeners.add(onStoreChange)
+        // TODO: Use dependencies to limit rerenders
+        dependencies
 
         return () => {
             this.listeners.delete(onStoreChange)
-            dispose()
         }
     }
 

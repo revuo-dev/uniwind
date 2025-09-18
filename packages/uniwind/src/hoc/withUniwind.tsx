@@ -1,7 +1,5 @@
 import { useEffect, useReducer } from 'react'
-import { CSSListener } from '../core/cssListener'
-import { formatColor } from '../core/formatColor'
-import { getWebStyles } from '../core/getWebStyles'
+import { CSSListener, formatColor, getWebStyles } from '../core/web'
 import { AnyObject, Component, OptionMapping, WithUniwind } from './types'
 import { classToColor, classToStyle, isClassProperty, isColorClassProperty, isStyleProperty } from './withUniwindUtils'
 

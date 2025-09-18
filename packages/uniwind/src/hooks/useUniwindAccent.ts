@@ -1,4 +1,4 @@
-import { formatColor } from '../core/formatColor'
+import { formatColor } from '../core/web/formatColor'
 import { useResolveClassNames } from './useResolveClassNames'
 
 export const useUniwindAccent = (className: string | undefined) => {

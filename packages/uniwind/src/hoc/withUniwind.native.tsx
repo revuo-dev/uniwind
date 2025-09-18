@@ -1,5 +1,5 @@
 import { useEffect, useReducer } from 'react'
-import { UniwindStore } from '../core'
+import { UniwindStore } from '../core/native'
 import { StyleDependency } from '../types'
 import { AnyObject, Component, OptionMapping, WithUniwind } from './types'
 import { classToColor, classToStyle, isClassProperty, isColorClassProperty, isStyleProperty } from './withUniwindUtils'

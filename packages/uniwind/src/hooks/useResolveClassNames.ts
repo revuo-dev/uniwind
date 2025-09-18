@@ -1,6 +1,5 @@
 import { useEffect, useReducer } from 'react'
-import { CSSListener } from '../core/cssListener'
-import { getWebStyles } from '../core/getWebStyles'
+import { CSSListener, getWebStyles } from '../core/web'
 
 export const useResolveClassNames = (className: string) => {
     const [styles, recreate] = useReducer(

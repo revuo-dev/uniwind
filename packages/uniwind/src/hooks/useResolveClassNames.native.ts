@@ -1,5 +1,5 @@
 import { useEffect, useReducer } from 'react'
-import { listenToNativeUpdates, UniwindStore } from '../core'
+import { UniwindStore } from '../core/native'
 
 export const useResolveClassNames = (className: string) => {
     const [uniwindState, recreate] = useReducer(
@@ -12,7 +12,7 @@ export const useResolveClassNames = (className: string) => {
     }, [className])
 
     useEffect(() => {
-        const dispose = listenToNativeUpdates(recreate, uniwindState.dependencies)
+        const dispose = UniwindStore.subscribe(recreate, uniwindState.dependencies)
 
         return dispose
     }, [uniwindState.dependencies, className])

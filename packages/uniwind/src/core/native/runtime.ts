@@ -1,7 +1,7 @@
 import { formatHex, interpolate } from 'culori'
 import { Appearance, Dimensions, I18nManager, PixelRatio } from 'react-native'
-import { ColorScheme, Orientation } from '../types'
-import type { UniwindRuntime as UniwindRuntimeType } from './types'
+import { ColorScheme, Orientation } from '../../types'
+import type { UniwindRuntime as UniwindRuntimeType } from '../types'
 
 const window = Dimensions.get('window')
 

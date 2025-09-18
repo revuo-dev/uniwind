@@ -9,7 +9,7 @@ describe('Converts tailwind shadow system', () => {
             'shadow-xl',
         )
 
-        const { UniwindStore } = await import('../../src/core')
+        const { UniwindStore } = await import('../../src/core/native')
         const styles = UniwindStore.getStyles('shadow-xl').styles
 
         expect(styles).toEqual({
@@ -42,7 +42,7 @@ describe('Converts tailwind shadow system', () => {
 
         await getStyleSheetsFromCandidates(...candidates)
 
-        const { UniwindStore } = await import('../../src/core')
+        const { UniwindStore } = await import('../../src/core/native')
         const styles = UniwindStore.getStyles(candidates.join(' ')).styles
 
         expect(styles).toEqual({
@@ -70,7 +70,7 @@ describe('Converts tailwind shadow system', () => {
     test('Ring', async () => {
         await getStyleSheetsFromCandidates('ring-2')
 
-        const { UniwindStore } = await import('../../src/core')
+        const { UniwindStore } = await import('../../src/core/native')
         const styles = UniwindStore.getStyles('ring-2').styles
 
         expect(styles).toEqual({
@@ -97,7 +97,7 @@ describe('Converts tailwind shadow system', () => {
 
         await getStyleSheetsFromCandidates(...candidates)
 
-        const { UniwindStore } = await import('../../src/core')
+        const { UniwindStore } = await import('../../src/core/native')
         const styles = UniwindStore.getStyles(candidates.join(' ')).styles
 
         expect(styles).toEqual({
@@ -130,7 +130,7 @@ describe('Converts tailwind shadow system', () => {
         ]
         await getStyleSheetsFromCandidates(...candidates)
 
-        const { UniwindStore } = await import('../../src/core')
+        const { UniwindStore } = await import('../../src/core/native')
         const styles = UniwindStore.getStyles(candidates.join(' ')).styles
 
         expect(styles).toEqual({

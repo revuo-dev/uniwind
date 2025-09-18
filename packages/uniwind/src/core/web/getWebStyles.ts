@@ -1,4 +1,4 @@
-import { RNStyle } from './types'
+import { RNStyle } from '../types'
 
 const dummy = typeof document !== 'undefined'
     ? Object.assign(document.createElement('div'), {

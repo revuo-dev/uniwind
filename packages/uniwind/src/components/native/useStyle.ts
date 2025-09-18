@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useReducer } from 'react'
-import { UniwindStore } from '../../core'
+import { UniwindStore } from '../../core/native'
 
 export const useStyle = (className?: string) => {
     const [_, rerender] = useReducer(() => ({}), {})
