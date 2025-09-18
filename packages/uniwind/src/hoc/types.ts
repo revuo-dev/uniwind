@@ -11,22 +11,22 @@ type ColorPropToClass<K extends PropertyKey> = K extends 'color' ? 'colorClassNa
     : never
 
 type ApplyUniwind<TProps extends AnyObject> =
-    & TProps
     & {
         [K in keyof TProps as StyleToClass<K>]?: string
     }
     & {
         [K in keyof TProps as ColorPropToClass<K>]?: string
     }
+    & TProps
 
 type ApplyUniwindOptions<TProps extends AnyObject, TOptions extends { [K in keyof TProps]?: OptionMapping }> =
-    & TProps
     & {
         // @ts-expect-error TS isn't smart enough to infer this
         [K in keyof TOptions as TOptions[K] extends undefined ? never : TOptions[K]['toClassName']]?: string
     }
+    & TProps
 
-export type Component<T extends AnyObject> = (props: T) => React.ReactNode
+export type Component<T extends AnyObject> = React.JSXElementConstructor<T>
 
 export type OptionMapping = {
     toClassName: string
@@ -35,7 +35,7 @@ export type OptionMapping = {
 
 export type WithUniwind = {
     // Auto mapping
-    <TProps extends AnyObject>(Component: Component<TProps>): (props: ApplyUniwind<TProps>) => React.ReactNode
+    <TProps extends AnyObject>(Component: Component<TProps>): (props: ApplyUniwind<TProps> & {}) => React.ReactNode
     // Manual mapping
     <TProps extends AnyObject, const TOptions extends { [K in keyof TProps]?: OptionMapping }>(
         Component: Component<TProps>,
