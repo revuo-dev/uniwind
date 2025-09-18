@@ -1,4 +1,5 @@
 import { RNStyle } from '../types'
+import { webToRN } from './webToRn'
 
 const dummy = typeof document !== 'undefined'
     ? Object.assign(document.createElement('div'), {
@@ -21,5 +22,5 @@ export const getWebStyles = (className?: string): RNStyle => {
 
     dummy.className = className
 
-    return window.getComputedStyle(dummy) as unknown as RNStyle
+    return webToRN(window.getComputedStyle(dummy))
 }
