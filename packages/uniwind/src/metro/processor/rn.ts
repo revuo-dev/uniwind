@@ -167,6 +167,12 @@ const cssToRNMap: Record<string, (value: any) => Record<string, any>> = {
 
         return {}
     },
+    fontSize: value => {
+        return {
+            fontSize: value,
+            '--uniwind-em': value,
+        }
+    },
 }
 
 export class RN {

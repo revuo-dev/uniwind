@@ -22,6 +22,8 @@ export class Units {
                     return `rt.screen.height * ${length.value / 100}`
                 case 'rem':
                     return `rt.rem * ${length.value}`
+                case 'em':
+                    return `this[\`--uniwind-em\`] * ${length.value}`
                 default:
                     this.logger.error(`Unsupported unit - ${length.unit}`)
 
