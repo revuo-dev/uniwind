@@ -3,11 +3,11 @@ import type { ImageStyle, TextStyle, ViewStyle } from 'react-native'
 export type AnyObject = Record<PropertyKey, any>
 
 type StyleToClass<K extends PropertyKey> = K extends 'style' ? 'className'
-    : K extends `${infer StyleProp extends string}Style` ? `${StyleProp}ClassName`
+    : K extends `${infer StyleProp}Style` ? `${StyleProp}ClassName`
     : never
 
 type ColorPropToClass<K extends PropertyKey> = K extends 'color' ? 'colorClassName'
-    : K extends `${infer ColorProp extends string}Color` ? `${ColorProp}ColorClassName`
+    : K extends `${string}Color` | `${string}color${string}` ? `${K}ClassName`
     : never
 
 type ApplyUniwind<TProps extends AnyObject> =
