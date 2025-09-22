@@ -54,6 +54,20 @@ const cssToRNMap: Record<string, (value: any) => Record<string, any>> = {
             borderLeftWidth: value.left,
         }
     },
+    borderColor: (value: string | PositionValues) => {
+        if (typeof value === 'string') {
+            return {
+                borderColor: value,
+            }
+        }
+
+        return {
+            borderTopColor: value.top,
+            borderRightColor: value.right,
+            borderBottomColor: value.bottom,
+            borderLeftColor: value.left,
+        }
+    },
     borderRadius: (value: string | CornerValues) => {
         if (typeof value === 'string') {
             return {
