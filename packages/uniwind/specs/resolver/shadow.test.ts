@@ -13,24 +13,8 @@ describe('Converts tailwind shadow system', () => {
         const styles = UniwindStore.getStyles('shadow-xl').styles
 
         expect(styles).toEqual({
-            boxShadow: [
-                {
-                    offsetX: 0,
-                    offsetY: 20,
-                    color: '#0000001a',
-                    inset: false,
-                    blurRadius: 25,
-                    spreadDistance: -5,
-                },
-                {
-                    offsetX: 0,
-                    offsetY: 8,
-                    color: '#0000001a',
-                    inset: false,
-                    blurRadius: 10,
-                    spreadDistance: -6,
-                },
-            ],
+            boxShadow:
+                '0px 0px #00000000, 0px 0px #00000000, 0px 0px #00000000, 0px 0px #00000000, 0px 20px 25px -5px #0000001a, 0px 8px 10px -6px #0000001a',
         })
     })
 
@@ -46,24 +30,8 @@ describe('Converts tailwind shadow system', () => {
         const styles = UniwindStore.getStyles(candidates.join(' ')).styles
 
         expect(styles).toEqual({
-            boxShadow: [
-                {
-                    offsetX: 0,
-                    offsetY: 20,
-                    color: '#fb2c3680',
-                    inset: false,
-                    blurRadius: 25,
-                    spreadDistance: -5,
-                },
-                {
-                    offsetX: 0,
-                    offsetY: 8,
-                    color: '#fb2c3680',
-                    inset: false,
-                    blurRadius: 10,
-                    spreadDistance: -6,
-                },
-            ],
+            boxShadow:
+                '0px 0px #00000000, 0px 0px #00000000, 0px 0px #00000000, 0px 0px #00000000, 0px 20px 25px -5px #fb2c3680, 0px 8px 10px -6px #fb2c3680',
         })
     })
 
@@ -74,16 +42,7 @@ describe('Converts tailwind shadow system', () => {
         const styles = UniwindStore.getStyles('ring-2').styles
 
         expect(styles).toEqual({
-            boxShadow: [
-                {
-                    offsetX: 0,
-                    offsetY: 0,
-                    color: '#000000',
-                    inset: false,
-                    blurRadius: 0,
-                    spreadDistance: 2,
-                },
-            ],
+            boxShadow: '0px 0px #00000000, 0px 0px #00000000, 0px 0px #00000000,  0px 0px 0px 2px #000000, 0px 0px #00000000',
         })
     })
 
@@ -101,24 +60,7 @@ describe('Converts tailwind shadow system', () => {
         const styles = UniwindStore.getStyles(candidates.join(' ')).styles
 
         expect(styles).toEqual({
-            boxShadow: [
-                {
-                    offsetX: 0,
-                    offsetY: 0,
-                    color: '#ffc9c9',
-                    inset: false,
-                    blurRadius: 0,
-                    spreadDistance: 4,
-                },
-                {
-                    offsetX: 0,
-                    offsetY: 0,
-                    color: '#00c950',
-                    inset: false,
-                    blurRadius: 0,
-                    spreadDistance: 8,
-                },
-            ],
+            boxShadow: '0px 0px #00000000, 0px 0px #00000000,  0px 0px 0px 4px #ffc9c9,  0px 0px 0px 8px #00c950, 0px 0px #00000000',
         })
     })
 
@@ -134,16 +76,7 @@ describe('Converts tailwind shadow system', () => {
         const styles = UniwindStore.getStyles(candidates.join(' ')).styles
 
         expect(styles).toEqual({
-            boxShadow: [
-                {
-                    offsetX: 0,
-                    offsetY: 0,
-                    color: '#2b7fff',
-                    blurRadius: 0,
-                    spreadDistance: 4,
-                    inset: true,
-                },
-            ],
+            boxShadow: '0px 0px #00000000, 0px 0px #00000000, 0px 0px #00000000, inset 0px 0px 0px 4px #2b7fff, 0px 0px #00000000',
         })
     })
 })
