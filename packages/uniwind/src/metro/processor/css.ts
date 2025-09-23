@@ -116,6 +116,8 @@ export class CSS {
                         return acc + tokenValue
                     }, '')
                 case 'rgb':
+                case 'oklab':
+                case 'hsl':
                     return this.Processor.Color.processColor(declarationValue)
                 case 'delim':
                     return ` ${declarationValue.value} `
