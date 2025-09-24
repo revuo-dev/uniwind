@@ -95,11 +95,6 @@ declare module 'react-native' {
         colorClassName?: string
     }
 
-    interface DrawerLayoutAndroidProps {
-        drawerBackgroundColorClassName?: string
-        statusBarBackgroundColorClassName?: string
-    }
-
     interface ModalBaseProps {
         backdropColorClassName?: string
     }
@@ -108,7 +103,7 @@ declare module 'react-native' {
         colorClassName?: string
     }
 
-    interface StatusBarPropsAndroid {
+    interface InputAccessoryViewProps {
         backgroundColorClassName?: string
     }
 }

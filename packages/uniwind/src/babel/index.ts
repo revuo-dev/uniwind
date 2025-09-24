@@ -9,6 +9,7 @@ const DEFAULT_RN_COMPONENTS = [
     'FlatList',
     'Image',
     'ImageBackground',
+    'InputAccessoryView',
     'KeyboardAvoidingView',
     'Modal',
     'Pressable',

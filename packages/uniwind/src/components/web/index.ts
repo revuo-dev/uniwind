@@ -21,13 +21,18 @@ export * from './TouchableWithoutFeedback'
 export * from './View'
 export * from './VirtualizedList'
 
-import { Animated as RNAnimated } from 'react-native'
+import { Animated as RNAnimated, InputAccessoryView, TouchableNativeFeedback } from 'react-native'
 import { FlatList } from './FlatList'
 import { Image } from './Image'
 import { ScrollView } from './ScrollView'
 import { SectionList } from './SectionList'
 import { Text } from './Text'
 import { View } from './View'
+
+export {
+    InputAccessoryView,
+    TouchableNativeFeedback,
+}
 
 export const Animated = {
     ...RNAnimated,
