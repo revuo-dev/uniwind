@@ -1,4 +1,4 @@
-import type { ImageStyle, TextStyle, ViewStyle } from 'react-native'
+import { RNStyle } from '../core/types'
 
 export type AnyObject = Record<PropertyKey, any>
 
@@ -30,7 +30,7 @@ export type Component<T extends AnyObject> = React.JSXElementConstructor<T>
 
 export type OptionMapping = {
     toClassName: string
-    styleProperty?: keyof (ViewStyle & ImageStyle & TextStyle)
+    styleProperty?: keyof RNStyle
 }
 
 export type WithUniwind = {
