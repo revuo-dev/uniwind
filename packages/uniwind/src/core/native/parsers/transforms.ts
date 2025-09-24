@@ -2,6 +2,7 @@ const transforms = [
     'translateX',
     'translateY',
     'translateZ',
+    'rotate',
     'rotateX',
     'rotateY',
     'rotateZ',

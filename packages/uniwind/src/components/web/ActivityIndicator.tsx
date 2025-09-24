@@ -10,7 +10,7 @@ export const ActivityIndicator = copyComponentProperties(RNActivityIndicator, (p
         <RNActivityIndicator
             {...props}
             style={[toRNWClassName(props.className), props.style]}
-            color={color ?? props.color}
+            color={props.color ?? color}
         />
     )
 })

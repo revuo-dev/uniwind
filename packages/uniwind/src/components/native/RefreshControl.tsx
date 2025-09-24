@@ -14,10 +14,10 @@ export const RefreshControl = copyComponentProperties(RNRefreshControl, (props: 
         <RNRefreshControl
             {...props}
             style={[style, props.style]}
-            colors={color !== undefined ? [color] : props.colors}
-            tintColor={tintColor ?? props.tintColor}
-            titleColor={titleColor ?? props.titleColor}
-            progressBackgroundColor={progressBackgroundColor ?? props.progressBackgroundColor}
+            colors={props.colors ?? (color !== undefined ? [color] : undefined)}
+            tintColor={props.tintColor ?? tintColor}
+            titleColor={props.titleColor ?? titleColor}
+            progressBackgroundColor={props.progressBackgroundColor ?? progressBackgroundColor}
         />
     )
 })

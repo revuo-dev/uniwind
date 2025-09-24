@@ -17,7 +17,7 @@ export const VirtualizedList = copyComponentProperties(RNVirtualizedList, (props
             contentContainerStyle={[contentContainerStyle, props.contentContainerStyle]}
             ListFooterComponentStyle={[listFooterComponentStyle, props.ListFooterComponentStyle]}
             ListHeaderComponentStyle={[listHeaderComponentStyle, props.ListHeaderComponentStyle]}
-            endFillColor={endFillColor ?? props.endFillColor}
+            endFillColor={props.endFillColor ?? endFillColor}
         />
     )
 })

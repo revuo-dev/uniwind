@@ -17,7 +17,7 @@ export const SectionList = copyComponentProperties(RNSectionList, (props: Sectio
             contentContainerStyle={[contentContainerStyle, props.contentContainerStyle]}
             ListFooterComponentStyle={[listFooterComponentStyle, props.ListFooterComponentStyle]}
             ListHeaderComponentStyle={[listHeaderComponentStyle, props.ListHeaderComponentStyle]}
-            endFillColor={endFillColor ?? props.endFillColor}
+            endFillColor={props.endFillColor ?? endFillColor}
         />
     )
 })

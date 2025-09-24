@@ -15,11 +15,11 @@ export const TextInput = copyComponentProperties(RNTextInput, (props: TextInputP
         <RNTextInput
             {...props}
             style={[style, props.style]}
-            cursorColor={cursorColor ?? props.cursorColor}
-            selectionColor={selectionColor ?? props.selectionColor}
-            placeholderTextColor={placeholderTextColor ?? props.placeholderTextColor}
-            selectionHandleColor={selectionHandleColor ?? props.selectionHandleColor}
-            underlineColorAndroid={underlineColorAndroid ?? props.underlineColorAndroid}
+            cursorColor={props.cursorColor ?? cursorColor}
+            selectionColor={props.selectionColor ?? selectionColor}
+            placeholderTextColor={props.placeholderTextColor ?? placeholderTextColor}
+            selectionHandleColor={props.selectionHandleColor ?? selectionHandleColor}
+            underlineColorAndroid={props.underlineColorAndroid ?? underlineColorAndroid}
         />
     )
 })

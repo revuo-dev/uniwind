@@ -11,7 +11,7 @@ export const Modal = copyComponentProperties(RNModal, (props: ModalProps) => {
         <RNModal
             {...props}
             style={[style, props.style]}
-            backdropColor={backdropColor ?? props.backdropColor}
+            backdropColor={props.backdropColor ?? backdropColor}
         />
     )
 })

@@ -8,7 +8,7 @@ export const Button = copyComponentProperties(RNButton, (props: ButtonProps) => 
     return (
         <RNButton
             {...props}
-            color={color ?? props.color}
+            color={props.color ?? color}
         />
     )
 })

@@ -11,7 +11,7 @@ export const Text = copyComponentProperties(RNText, (props: TextProps) => {
         <RNText
             {...props}
             style={[style, props.style]}
-            selectionColor={selectionColor ?? props.selectionColor}
+            selectionColor={props.selectionColor ?? selectionColor}
         />
     )
 })

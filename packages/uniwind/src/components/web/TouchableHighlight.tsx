@@ -10,7 +10,7 @@ export const TouchableHighlight = copyComponentProperties(RNTouchableHighlight, 
         <RNTouchableHighlight
             {...props}
             style={[toRNWClassName(props.className), props.style]}
-            underlayColor={underlayColor ?? props.underlayColor}
+            underlayColor={props.underlayColor ?? underlayColor}
         />
     )
 })

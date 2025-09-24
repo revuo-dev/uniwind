@@ -11,7 +11,7 @@ export const Image = copyComponentProperties(RNImage, (props: ImageProps) => {
         <RNImage
             {...props}
             style={[style, props.style]}
-            tintColor={tintColor ?? props.tintColor}
+            tintColor={props.tintColor ?? tintColor}
         />
     )
 })

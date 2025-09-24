@@ -13,7 +13,7 @@ export const ScrollView = copyComponentProperties(RNScrollView, (props: ScrollVi
             {...props}
             style={[style, props.style]}
             contentContainerStyle={[contentContainerStyle, props.contentContainerStyle]}
-            endFillColor={endFillColor ?? props.endFillColor}
+            endFillColor={props.endFillColor ?? endFillColor}
         />
     )
 })

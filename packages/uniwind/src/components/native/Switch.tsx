@@ -14,9 +14,9 @@ export const Switch = copyComponentProperties(RNSwitch, (props: SwitchProps) => 
         <RNSwitch
             {...props}
             style={[style, props.style]}
-            thumbColor={thumbColor ?? props.thumbColor}
-            trackColor={{ true: trackColorOn ?? props.trackColor?.true, false: trackColorOff ?? props.trackColor?.false }}
-            ios_backgroundColor={ios_backgroundColor ?? props.ios_backgroundColor}
+            thumbColor={props.thumbColor ?? thumbColor}
+            trackColor={{ true: props.trackColor?.true ?? trackColorOn, false: props.trackColor?.false ?? trackColorOff }}
+            ios_backgroundColor={props.ios_backgroundColor ?? ios_backgroundColor}
         />
     )
 })

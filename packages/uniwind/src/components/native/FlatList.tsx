@@ -19,7 +19,7 @@ export const FlatList = copyComponentProperties(RNFlatList, (props: FlatListProp
             contentContainerStyle={[styleContentContainer, props.contentContainerStyle]}
             ListFooterComponentStyle={[styleListFooterComponent, props.ListFooterComponentStyle]}
             ListHeaderComponentStyle={[styleListHeaderComponent, props.ListHeaderComponentStyle]}
-            endFillColor={endFillColor ?? props.endFillColor}
+            endFillColor={props.endFillColor ?? endFillColor}
         />
     )
 })
