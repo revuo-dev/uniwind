@@ -1,5 +1,5 @@
 import { Logger } from '../logger'
-import { isNumber, pipe, smartSplit } from '../utils'
+import { addMissingSpaces, isNumber, pipe, smartSplit } from '../utils'
 
 type Stylesheet = Record<string, any>
 
@@ -47,78 +47,78 @@ const toJSExpression = (value: string): string => {
     }
 
     if (!value.includes(FN_DECLARATION)) {
-        return pipe(value)(
-            x => {
-                if (isFunction(x)) {
-                    const [fnName] = x.split('(')
+        if (isFunction(value)) {
+            const [fnName] = value.split('(')
 
-                    if (fnName === undefined) {
-                        return x
+            if (fnName === undefined) {
+                return value
+            }
+
+            const args = pipe(value)(
+                x => x
+                    .replace(fnName, '')
+                    .replace('(', '')
+                    .slice(0, -1)
+                    .trim(),
+                x => smartSplit(x, /[,\s]+/),
+                x => x.map(token => {
+                    if (token.endsWith(',')) {
+                        return token.slice(0, -1)
                     }
 
-                    const args = pipe(x)(
-                        x => x
-                            .replace(fnName, '')
-                            .replace('(', '')
-                            .slice(0, -1)
-                            .trim(),
-                        smartSplit,
-                        x => x.map(token => {
-                            if (token.endsWith(',')) {
-                                return token.slice(0, -1)
-                            }
+                    return token
+                }),
+                x => x.map(toJSExpression),
+            )
 
-                            return token
-                        }),
-                        x => x.map(toJSExpression),
-                    )
+            return [
+                fnName,
+                '(',
+                args.join(','),
+                ')',
+            ].join('')
+        }
 
+        if (!isValidJSValue(value)) {
+            const tokens = smartSplit(value).map(token => {
+                if (isNumber(token)) {
+                    return token
+                }
+
+                if (isFunction(token)) {
+                    return toJSExpression(token)
+                }
+
+                const parsedToken = pipe(token)(
+                    x => x.replace(',', ''),
+                    x => {
+                        if (x.includes('??')) {
+                            return x.split(' ?? ').map(toJSExpression).join(' ?? ')
+                        }
+
+                        return toJSExpression(x)
+                    },
+                )
+
+                if (parsedToken.startsWith('"')) {
                     return [
-                        fnName,
-                        '(',
-                        args.join(','),
-                        ')',
+                        parsedToken.slice(1, -1),
+                        token.includes(',') ? ',' : '',
                     ].join('')
                 }
 
-                if (!isValidJSValue(x)) {
-                    const tokens = smartSplit(x).map(token => {
-                        if (isNumber(token)) {
-                            return token
-                        }
+                return [
+                    '${',
+                    parsedToken,
+                    '}',
+                    token.includes(',') ? ',' : '',
+                ].join('')
+            })
 
-                        const parsedToken = pipe(token)(
-                            x => x.replace(',', ''),
-                            x => {
-                                if (x.includes('??')) {
-                                    return x.split(' ?? ').map(toJSExpression).join(' ?? ')
-                                }
+            return `\`${tokens.join(' ')}\``
+        }
 
-                                return toJSExpression(x)
-                            },
-                        )
-
-                        if (parsedToken.startsWith('"')) {
-                            return [
-                                parsedToken.slice(1, -1),
-                                token.includes(',') ? ',' : '',
-                            ].join('')
-                        }
-
-                        return [
-                            '${',
-                            parsedToken,
-                            '}',
-                            token.includes(',') ? ',' : '',
-                        ].join('')
-                    })
-
-                    return `\`${tokens.join(' ')}\``
-                }
-
-                return x
-            },
-        )
+        return value
     }
 
     const [, after] = value.split(FN_DECLARATION)
@@ -158,7 +158,7 @@ const serialize = (value: any): string => {
             ].join('')
         }
         case 'string':
-            return toJSExpression(value.trim())
+            return toJSExpression(addMissingSpaces(value))
         default:
             return String(value)
     }

@@ -29,13 +29,13 @@ export const isNumber = (data: any) => {
     return false
 }
 
-export const smartSplit = (str: string) => {
+export const smartSplit = (str: string, separator = ' ' as string | RegExp) => {
     const escaper = '&&&'
 
     return pipe(str)(
         x => x.replace(/\s\?\?\s/g, `${escaper}??${escaper}`),
         x => x.replace(/\s([+\-*/])\s/g, `${escaper}$1${escaper}`),
-        x => x.split(' '),
+        x => x.split(separator),
         x => x.map(token => token.replace(new RegExp(escaper, 'g'), ' ')),
     )
 }
@@ -57,3 +57,11 @@ export const areSetsEqual = <T>(a: Set<T>, b: Set<T>) => {
 
     return true
 }
+
+export const addMissingSpaces = (str: string) =>
+    pipe(str)(
+        x => x.trim(),
+        x => x.replace(/]this/g, '] this'),
+        x => x.replace(/\](?=\d)/g, '] '),
+        x => x.replace(/\)(?=\S)/g, ') '),
+    )

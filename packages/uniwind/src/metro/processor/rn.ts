@@ -1,4 +1,4 @@
-import { isDefined, percentageToFloat, pipe, toCamelCase } from '../utils'
+import { addMissingSpaces, isDefined, percentageToFloat, toCamelCase } from '../utils'
 import type { ProcessorBuilder } from './processor'
 
 const cssToRNKeyMap = {
@@ -176,7 +176,9 @@ const cssToRNMap: Record<string, (value: any) => Record<string, any>> = {
     },
     transform: value => {
         if (typeof value === 'object') {
-            return value
+            return Object.keys(value).length === 0
+                ? { transform: [] }
+                : value
         }
 
         return {}
@@ -193,19 +195,13 @@ export class RN {
     constructor(private readonly Processor: ProcessorBuilder) {}
 
     cssToRN(property: string, value: any) {
-        // Sometimes lightningcss doesn't include whitespace between css variables
-        const parsedValue = typeof value === 'string'
-            ? pipe(value)(
-                x => x.replace(/]this/g, '] this'),
-                x => x.replace(/\](?=\d)/g, '] '),
-            )
-            : value
-
         const transformedProperty = property.startsWith('--')
             ? property
             : toCamelCase(property)
 
-        const rn = cssToRNMap[transformedProperty]?.(parsedValue) ?? { [transformedProperty]: parsedValue }
+        const rn = cssToRNMap[transformedProperty]?.(
+            typeof value === 'string' ? addMissingSpaces(value) : value,
+        ) ?? { [transformedProperty]: value }
 
         return Object.entries(rn).filter(([, value]) => isDefined(value)) as Array<[string, any]>
     }
