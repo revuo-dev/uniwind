@@ -6,17 +6,26 @@ import { UniwindRuntime } from './runtime'
 
 export class UniwindStoreBuilder {
     stylesheets = {} as StyleSheets
-    listeners = new Set<() => void>()
+    listeners = {
+        [StyleDependency.ColorScheme]: new Set<() => void>(),
+        [StyleDependency.Dimensions]: new Set<() => void>(),
+        [StyleDependency.Orientation]: new Set<() => void>(),
+        [StyleDependency.Insets]: new Set<() => void>(),
+        [StyleDependency.FontScale]: new Set<() => void>(),
+        [StyleDependency.Rtl]: new Set<() => void>(),
+    }
     initialized = false
     runtime = UniwindRuntime
 
     subscribe(onStoreChange: () => void, dependencies: Array<StyleDependency>) {
-        this.listeners.add(onStoreChange)
-        // TODO: Use dependencies to limit rerenders
-        dependencies
+        dependencies.forEach(dep => {
+            this.listeners[dep].add(onStoreChange)
+        })
 
         return () => {
-            this.listeners.delete(onStoreChange)
+            dependencies.forEach(dep => {
+                this.listeners[dep].delete(onStoreChange)
+            })
         }
     }
 
@@ -53,8 +62,8 @@ export class UniwindStoreBuilder {
         this.stylesheets = globalThis.__uniwind__computeStylesheet(this.runtime)
     }
 
-    notifyListeners = () => {
-        this.listeners.forEach(listener => listener())
+    notifyListeners = (dependencies: Array<StyleDependency>) => {
+        dependencies.forEach(dep => this.listeners[dep].forEach(listener => listener()))
     }
 
     private resolveStyles(styles: Array<[string, Style]>) {
@@ -172,15 +181,21 @@ if (__DEV__) {
 }
 
 Dimensions.addEventListener('change', ({ window }) => {
+    const newOrientation = window.width > window.height ? Orientation.Landscape : Orientation.Portrait
+    const orientationChanged = UniwindStore.runtime.orientation !== newOrientation
+
     UniwindStore.runtime.screen = {
         width: window.width,
         height: window.height,
     }
-    UniwindStore.runtime.orientation = window.width > window.height ? Orientation.Landscape : Orientation.Portrait
-    UniwindStore.notifyListeners()
+    UniwindStore.runtime.orientation = newOrientation
+    UniwindStore.notifyListeners([
+        ...orientationChanged ? [StyleDependency.Orientation] : [],
+        StyleDependency.Dimensions,
+    ])
 })
 
 Appearance.addChangeListener(({ colorScheme }) => {
     UniwindStore.runtime.colorScheme = (colorScheme ?? ColorScheme.Light) as ColorScheme
-    UniwindStore.notifyListeners()
+    UniwindStore.notifyListeners([StyleDependency.ColorScheme])
 })
