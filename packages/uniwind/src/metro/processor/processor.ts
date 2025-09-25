@@ -40,20 +40,33 @@ export class ProcessorBuilder {
             rtl: null as boolean | null,
             mediaQueries: [] as Array<MediaQuery>,
             root: false,
+            theme: null as string | null,
         })
     }
 
     private addDeclaration(declaration: Declaration, important = false) {
         const isVar = this.declarationConfig.root || this.declarationConfig.className === null
-        const style = isVar
-            ? this.vars
-            : this.stylesheets[this.declarationConfig.className!]?.at(-1)
+        const style = (() => {
+            if (!isVar) {
+                return this.stylesheets[this.declarationConfig.className!]?.at(-1)
+            }
+
+            if (this.declarationConfig.theme === null) {
+                return this.vars
+            }
+
+            const themeKey = `__uniwind-theme-${this.declarationConfig.theme}`
+            this.vars[themeKey] ??= {}
+
+            return this.vars[themeKey]
+        })()
         const mq = this.MQ.processMediaQueries(this.declarationConfig.mediaQueries)
 
         if (!isVar) {
             Object.assign(style, mq)
             style.importantProperties ??= []
             style.rtl = this.declarationConfig.rtl
+            style.theme = mq.colorScheme ?? this.declarationConfig.theme
         }
 
         if (declaration.property === 'unparsed') {
@@ -102,11 +115,16 @@ export class ProcessorBuilder {
                 }
 
                 let rtl = null as boolean | null
+                let theme = null as string | null
 
                 selector.forEach(selector => {
                     if (selector.type === 'pseudo-class' && selector.kind === 'where') {
                         selector.selectors.forEach(selector => {
                             selector.forEach(selector => {
+                                if (selector.type === 'class') {
+                                    theme = selector.name
+                                }
+
                                 if (selector.type === 'pseudo-class' && selector.kind === 'dir') {
                                     rtl = selector.direction === 'rtl'
                                 }
@@ -115,8 +133,9 @@ export class ProcessorBuilder {
                     }
                 })
 
-                if (rtl !== null) {
+                if (rtl !== null || theme !== null) {
                     this.declarationConfig.rtl = rtl
+                    this.declarationConfig.theme = theme
 
                     rule.value.declarations?.declarations?.forEach(declaration => this.addDeclaration(declaration))
                     rule.value.declarations?.importantDeclarations?.forEach(declaration => this.addDeclaration(declaration, true))
