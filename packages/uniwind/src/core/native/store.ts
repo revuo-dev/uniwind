@@ -182,6 +182,7 @@ export const UniwindStore = new UniwindStoreBuilder()
 if (__DEV__) {
     globalThis.__uniwind__hot_reload = () => {
         UniwindStore.reload()
+        UniwindStore.notifyListeners([StyleDependency.Theme])
     }
 }
 
