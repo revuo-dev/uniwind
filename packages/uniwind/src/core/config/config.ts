@@ -14,7 +14,7 @@ export type Config = {
 }
 
 class UniwindConfigBuilder {
-    #themes: UserThemes = []
+    #themes: UserThemes = ['light', 'dark']
     #hasAdaptiveThemes = true
     #colorScheme = Appearance.getColorScheme() ?? ColorScheme.Light
     #currentTheme = this.#colorScheme as ThemeName
