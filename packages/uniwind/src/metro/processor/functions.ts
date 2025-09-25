@@ -1,4 +1,4 @@
-import { CalcFor_DimensionPercentageFor_LengthValue, CalcFor_Length, Function as FunctionType } from 'lightningcss'
+import { CalcFor_DimensionPercentageFor_LengthValue, CalcFor_Length, CssColor, Function as FunctionType } from 'lightningcss'
 import { Logger } from '../logger'
 import { percentageToFloat, pipe } from '../utils'
 import type { ProcessorBuilder } from './processor'
@@ -90,6 +90,23 @@ export class Functions {
 
         if (fn.name === 'color-mix') {
             return this.processColorMix(fn)
+        }
+
+        if (
+            [
+                'rgb',
+                'oklab',
+                'oklch',
+                'hsl',
+                'hwb',
+                'lab',
+                'lch',
+                'srgb',
+            ].includes(fn.name)
+        ) {
+            const color = `${fn.name}(${this.Processor.CSS.processValue(fn.arguments)})`
+
+            return this.Processor.Color.processColor(color as CssColor)
         }
 
         if (
