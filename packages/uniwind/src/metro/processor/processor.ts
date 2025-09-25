@@ -141,6 +141,9 @@ export class ProcessorBuilder {
                     rule.value.declarations?.importantDeclarations?.forEach(declaration => this.addDeclaration(declaration, true))
                     rule.value.rules?.forEach(rule => this.parseRuleRec(rule))
 
+                    this.declarationConfig.rtl = null
+                    this.declarationConfig.theme = null
+
                     return
                 }
 
