@@ -117,7 +117,12 @@ export class CSS {
                     }, '')
                 case 'rgb':
                 case 'oklab':
+                case 'oklch':
                 case 'hsl':
+                case 'hwb':
+                case 'lab':
+                case 'lch':
+                case 'srgb':
                     return this.Processor.Color.processColor(declarationValue)
                 case 'delim':
                     return ` ${declarationValue.value} `

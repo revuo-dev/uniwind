@@ -26,7 +26,7 @@ export class Color {
         }
 
         try {
-            if (color.type === 'rgb') {
+            if (color.type === 'rgb' || color.type === 'srgb') {
                 return this.format({
                     r: color.r / 255,
                     g: color.g / 255,
