@@ -26,6 +26,10 @@ export class Color {
         }
 
         try {
+            if (color.type === 'currentcolor') {
+                return 'this["currentColor"]'
+            }
+
             if (color.type === 'rgb' || color.type === 'srgb') {
                 return this.format({
                     r: color.r / 255,
