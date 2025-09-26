@@ -162,19 +162,14 @@ export class Functions {
         const percentage = percentageToFloat(tokens.find(token => token.endsWith('%')) ?? '50%')
         const mixColor = tokens.reverse().find(token => token.startsWith('#') || token.startsWith('this[`--color-'))
 
-        // Not transparent
-        if (mixColor !== '#00000000') {
-            return [
-                'rt.colorMix( ',
-                color,
-                ', ',
-                mixColor,
-                ', ',
-                percentage,
-                ' )',
-            ].join('')
-        }
-
-        return this.Processor.Color.changeAlpha(color ?? '', percentage)
+        return [
+            'rt.colorMix( ',
+            color,
+            ', ',
+            mixColor,
+            ', ',
+            percentage,
+            ' )',
+        ].join('')
     }
 }

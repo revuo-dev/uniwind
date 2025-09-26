@@ -1,3 +1,4 @@
+import { colorMix } from '../src/core/native/native-utils'
 import { ColorScheme, Orientation } from '../src/types'
 
 export const UniwindRuntimeMock = {
@@ -9,10 +10,12 @@ export const UniwindRuntimeMock = {
     orientation: Orientation.Portrait,
     rem: 16,
     rtl: false,
+    currentThemeName: ColorScheme.Light,
     insets: {
         top: 20,
         left: 10,
         bottom: 0,
         right: 0,
     },
+    colorMix,
 }

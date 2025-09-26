@@ -161,6 +161,12 @@ export class ProcessorBuilder {
             return
         }
 
+        if (rule.type === 'supports') {
+            rule.value.rules.forEach(rule => this.parseRuleRec(rule))
+
+            return
+        }
+
         if (rule.type === 'media') {
             const { mediaQueries } = rule.value.query
 
