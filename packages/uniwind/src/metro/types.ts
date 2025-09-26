@@ -30,6 +30,8 @@ export type DeepMutable<T> = {
 
 export type UniwindConfig = {
     input: string
+    themes?: Array<string>
+    dtsPath?: string
 }
 
 export type MediaQueryResolver = {

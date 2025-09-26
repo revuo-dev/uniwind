@@ -66,4 +66,5 @@ export type UniwindComponentProps =
 declare global {
     var __uniwind__computeStylesheet: (runtime: UniwindRuntime) => StyleSheets
     var __uniwind__hot_reload: () => void
+    var __uniwindThemes__: ReadonlyArray<string> | undefined
 }

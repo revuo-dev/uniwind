@@ -10,11 +10,10 @@ export type ThemeName = UserThemes[number]
 export type Config = {
     initialTheme?: ThemeName
     adaptiveThemes?: boolean
-    themes?: UserThemes
 }
 
 class UniwindConfigBuilder {
-    #themes: UserThemes = ['light', 'dark']
+    #themes: UserThemes = []
     #hasAdaptiveThemes = true
     #colorScheme = Appearance.getColorScheme() ?? ColorScheme.Light
     #currentTheme = this.#colorScheme as ThemeName
@@ -24,7 +23,7 @@ class UniwindConfigBuilder {
             const colorScheme = event.colorScheme ?? ColorScheme.Light
             const prevTheme = this.#currentTheme
 
-            if (this.hasAdaptiveThemes && prevTheme !== colorScheme) {
+            if (this.#hasAdaptiveThemes && prevTheme !== colorScheme) {
                 this.#currentTheme = colorScheme
                 this.emitThemeChange()
             }
@@ -44,7 +43,7 @@ class UniwindConfigBuilder {
     }
 
     configure(config: Config) {
-        this.#themes = config.themes ?? []
+        this.#themes = globalThis.__uniwindThemes__ ?? ['light', 'dark']
 
         if (config.adaptiveThemes && !this.haveLightAndDarkThemes) {
             throw new Error(`Uniwind: You're trying to enable adaptive themes, but you did not register 'light' and 'dark' themes.`)

@@ -4,6 +4,7 @@ import fs from 'fs'
 import type { MetroConfig } from 'metro-config'
 import path from 'path'
 import { compileVirtual } from './compileVirtual'
+import { injectThemes } from './injectThemes'
 import { DeepMutable, ExtendedBundler, ExtendedFileSystem, FileChangeEvent, Platform, UniwindConfig } from './types'
 import { areSetsEqual } from './utils'
 
@@ -20,6 +21,14 @@ export const withUniwindConfig = (
     config: DeepMutable<MetroConfig>,
     uniwindConfig: UniwindConfig,
 ) => {
+    if (typeof uniwindConfig === 'undefined') {
+        throw new Error('Uniwind: You need to pass second parameter to withUniwindConfig')
+    }
+
+    if (typeof uniwindConfig.input === 'undefined') {
+        throw new Error('Uniwind: You need to pass input path to withUniwindConfig, e.g. withUniwindConfig(config, { input: "./global.css" })')
+    }
+
     const uniwind = {
         input: path.join(process.cwd(), uniwindConfig.input),
         originalResolveRequest: config.resolver?.resolveRequest,
@@ -40,6 +49,12 @@ export const withUniwindConfig = (
                 ],
             }).scan(),
     }
+
+    const injectedThemesScript = injectThemes({
+        dtsPath: uniwindConfig.dtsPath,
+        themes: uniwindConfig.themes,
+        input: uniwind.input,
+    })
 
     config.resolver ??= {}
     config.server ??= {}
@@ -167,7 +182,7 @@ export const withUniwindConfig = (
                 if (platform) {
                     const virtualFile = await getVirtualFile(platform)
 
-                    fileBuffer = Buffer.from(virtualFile)
+                    fileBuffer = Buffer.from(`${virtualFile}${injectedThemesScript}`)
                 }
             }
 
