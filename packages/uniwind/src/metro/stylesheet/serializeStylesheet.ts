@@ -152,6 +152,11 @@ const serialize = (value: any): string => {
             return [
                 '({',
                 Object.entries(value).map(([key, value]) => {
+                    // Always serialize className as string
+                    if (key === 'className') {
+                        return `"${key}": "${String(value)}"`
+                    }
+
                     return `"${key}": ${serialize(value)}`
                 }).join(', '),
                 '})',
