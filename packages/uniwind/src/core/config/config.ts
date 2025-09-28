@@ -86,7 +86,7 @@ class UniwindConfigBuilder {
         this.#hasAdaptiveThemes = false
     }
 
-    setCurrentTheme(theme: ThemeName) {
+    setTheme(theme: ThemeName) {
         if (theme === this.#currentTheme) {
             return
         }

@@ -1,7 +1,12 @@
 import './global.css'
-import { Text, View } from 'react-native'
+import { Button, Text, View } from 'react-native'
+import { Uniwind, useUniwind } from 'uniwind'
 
-export default function App() {
+export function App() {
+    const { theme } = useUniwind()
+
+    console.log(theme)
+
     return (
         <View className="py-20 px-10 flex flex-row flex-wrap gap-10">
             <View className="ring-2 w-32 h-32">
@@ -24,6 +29,13 @@ export default function App() {
                     shadow-2xl shadow-red-500
                 </Text>
             </View>
+            <Button
+                title="Change theme"
+                onPress={() => {
+                    Uniwind.setAdaptiveThemes(false)
+                    Uniwind.setTheme(theme === 'light' ? 'dark' : 'light')
+                }}
+            />
         </View>
     )
 }
