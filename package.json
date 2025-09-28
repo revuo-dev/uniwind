@@ -11,7 +11,8 @@
         "start": "turbo start",
         "lint": "turbo lint",
         "precommit": "turbo precommit",
-        "test": "turbo test"
+        "test": "turbo test",
+        "format": "dprint fmt"
     },
     "workspaces": [
         "packages/*",

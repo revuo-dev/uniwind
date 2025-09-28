@@ -16,6 +16,7 @@ export default [
             'functional/no-loop-statements': 'off',
             'nested-if/nested-if-statements': 'off',
             'no-continue': 'off',
+            '@typescript-eslint/array-type': 'off',
         },
     },
     {
