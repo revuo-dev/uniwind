@@ -1,15 +1,21 @@
-import chalk from 'chalk'
+import fs from 'fs'
+import path from 'path'
 import { generateCSSForInsets } from './insets'
+import { generateCSSForThemes } from './themes'
 import { generateCSSForVariants } from './variants'
 
-const variants = generateCSSForVariants()
-const insets = generateCSSForInsets()
-const uniwindCSS = Bun.file('uniwind.css')
+export const buildCSS = (themes: Array<string>, input: string) => {
+    const variants = generateCSSForVariants()
+    const insets = generateCSSForInsets()
+    const themesCSS = generateCSSForThemes(themes, input)
+    const cssFile = path.join(__dirname, '../../uniwind.css')
 
-uniwindCSS.write([
-    variants,
-    insets,
-].join('\n'))
-
-// eslint-disable-next-line no-console
-console.log(chalk.green('CSS generated successfully'))
+    fs.writeFileSync(
+        cssFile,
+        [
+            variants,
+            insets,
+            themesCSS,
+        ].join('\n'),
+    )
+}
