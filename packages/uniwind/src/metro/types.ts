@@ -29,9 +29,9 @@ export type DeepMutable<T> = {
 }
 
 export type UniwindConfig = {
-    input: string
+    cssEntryFile: string
     themes?: Array<string>
-    dtsPath?: string
+    dtsFile?: string
 }
 
 export type MediaQueryResolver = {

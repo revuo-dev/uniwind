@@ -27,4 +27,7 @@ const config = {
     },
 }
 
-module.exports = withUniwindConfig(mergeConfig(getDefaultConfig(__dirname), config), { input: './src/global.css', dtsPath: './src/uniwind.d.ts' })
+module.exports = withUniwindConfig(mergeConfig(getDefaultConfig(__dirname), config), {
+    cssEntryFile: './src/global.css',
+    dtsPath: './src/uniwind.d.ts',
+})

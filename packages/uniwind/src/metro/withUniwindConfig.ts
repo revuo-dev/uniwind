@@ -25,12 +25,14 @@ export const withUniwindConfig = (
         throw new Error('Uniwind: You need to pass second parameter to withUniwindConfig')
     }
 
-    if (typeof uniwindConfig.input === 'undefined') {
-        throw new Error('Uniwind: You need to pass input path to withUniwindConfig, e.g. withUniwindConfig(config, { input: "./global.css" })')
+    if (typeof uniwindConfig.cssEntryFile === 'undefined') {
+        throw new Error(
+            'Uniwind: You need to pass css css entry file to withUniwindConfig, e.g. withUniwindConfig(config, { cssEntryFile: "./global.css" })',
+        )
     }
 
     const uniwind = {
-        input: path.join(process.cwd(), uniwindConfig.input),
+        input: path.join(process.cwd(), uniwindConfig.cssEntryFile),
         originalResolveRequest: config.resolver?.resolveRequest,
         originalGetTransformOptions: config.transformer?.getTransformOptions,
         watcher: null as EventEmitter | null,
@@ -53,7 +55,7 @@ export const withUniwindConfig = (
 
     const getInjectedThemesScript = () =>
         injectThemes({
-            dtsPath: uniwindConfig.dtsPath,
+            dtsPath: uniwindConfig.dtsFile,
             themes: uniwindConfig.themes,
             input: uniwind.input,
         })
@@ -74,7 +76,7 @@ export const withUniwindConfig = (
         const resolver = uniwind.originalResolveRequest ?? context.resolveRequest
         const resolved = resolver(context, moduleName, platform)
 
-        if (('filePath' in resolved && resolved.filePath !== path.join(process.cwd(), uniwindConfig.input))) {
+        if (('filePath' in resolved && resolved.filePath !== path.join(process.cwd(), uniwindConfig.cssEntryFile))) {
             return resolved
         }
 

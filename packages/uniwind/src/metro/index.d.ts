@@ -1,9 +1,9 @@
 import type { MetroConfig } from 'metro-config'
 
 type UniwindConfig = {
-    input: string
+    cssEntryFile: string
     themes?: Array<string>
-    dtsPath?: string
+    dtsFile?: string
 }
 
 export declare function withUniwindConfig(config: MetroConfig, options: UniwindConfig): MetroConfig
