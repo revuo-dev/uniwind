@@ -61,6 +61,10 @@ class UniwindConfigBuilder {
             throw new Error(`Uniwind: You're trying to set '${config.initialTheme}' as initial theme, but it was not registered.`)
         }
 
+        if (config.initialTheme === undefined && !config.adaptiveThemes && this.#themes.length > 1) {
+            throw new Error(`Uniwind: You need to set initial theme or enable adaptive themes.`)
+        }
+
         if (config.initialTheme !== undefined) {
             this.#currentTheme = config.initialTheme
             this.emitThemeChange()
