@@ -2,6 +2,7 @@ class CSSListenerBuilder {
     private classNameMediaQueryListeners = new Map<string, MediaQueryList>()
     private listeners = new Map<MediaQueryList, Set<VoidFunction>>()
     private registeredRules = new Map<string, MediaQueryList>()
+    private themeListeners = new Set<VoidFunction>()
 
     constructor() {
         if (typeof document === 'undefined') {
@@ -43,6 +44,16 @@ class CSSListenerBuilder {
         })
 
         return () => disposables.forEach(disposable => disposable())
+    }
+
+    addThemeListener(listener: VoidFunction) {
+        this.themeListeners.add(listener)
+
+        return () => this.themeListeners.delete(listener)
+    }
+
+    notifyThemeChange() {
+        this.themeListeners.forEach(listener => listener())
     }
 
     private initialize() {

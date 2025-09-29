@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react'
 import { Uniwind } from '../core'
-import { CSSListener } from '../core/web'
+import { UniwindStore } from '../core/native'
+import { StyleDependency } from '../types'
 
 export const useUniwind = () => {
     const [theme, setTheme] = useState(Uniwind.currentTheme)
 
     useEffect(() => {
-        const dispose = CSSListener.addThemeListener(() => setTheme(Uniwind.currentTheme))
+        const dispose = UniwindStore.subscribe(() => {
+            setTheme(Uniwind.currentTheme)
+        }, [StyleDependency.Theme])
 
         return () => {
             dispose()
