@@ -1,4 +1,4 @@
-import { Appearance } from 'react-native'
+import { Appearance, Platform } from 'react-native'
 import { ColorScheme, UniwindConfig } from '../../types'
 import { themeChange } from './themeChange'
 
@@ -19,6 +19,10 @@ class UniwindConfigBuilder {
     #currentTheme = this.#colorScheme as ThemeName
 
     constructor() {
+        if (Platform.OS === 'web') {
+            this.emitThemeChange()
+        }
+
         Appearance.addChangeListener(event => {
             const colorScheme = event.colorScheme ?? ColorScheme.Light
             const prevTheme = this.#currentTheme

@@ -38,6 +38,7 @@ export const withUniwindConfig = (
         virtualModules: new Map<string, string>(),
         candidates: new Set<string>(),
         cssFile: '',
+        injectedThemesScript: '',
         getCandidates: () =>
             new Scanner({
                 sources: [
@@ -50,12 +51,14 @@ export const withUniwindConfig = (
             }).scan(),
     }
 
-    const injectedThemesScript = injectThemes({
-        dtsPath: uniwindConfig.dtsPath,
-        themes: uniwindConfig.themes,
-        input: uniwind.input,
-    })
+    const getInjectedThemesScript = () =>
+        injectThemes({
+            dtsPath: uniwindConfig.dtsPath,
+            themes: uniwindConfig.themes,
+            input: uniwind.input,
+        })
 
+    uniwind.injectedThemesScript = getInjectedThemesScript()
     config.resolver ??= {}
     config.server ??= {}
     config.transformer ??= {}
@@ -102,7 +105,7 @@ export const withUniwindConfig = (
                             // Listen only to changes in JS/TS/css files
                             !event.eventsQueue.some(event => {
                                 return ['.js', '.jsx', '.ts', '.tsx', '.css'].some(ext => event.filePath.endsWith(ext))
-                            })
+                            }) || event.eventsQueue.every(event => event.filePath.endsWith('uniwind.css'))
                         ) {
                             return
                         }
@@ -115,6 +118,7 @@ export const withUniwindConfig = (
                             return
                         }
 
+                        uniwind.injectedThemesScript = getInjectedThemesScript()
                         uniwind.cssFile = css
                         uniwind.candidates = candidates
                         platforms.forEach(platform => {
@@ -182,7 +186,7 @@ export const withUniwindConfig = (
                 if (platform) {
                     const virtualFile = await getVirtualFile(platform)
 
-                    fileBuffer = Buffer.from(`${virtualFile}${injectedThemesScript}`)
+                    fileBuffer = Buffer.from(`${virtualFile}${uniwind.injectedThemesScript}`)
                 }
             }
 

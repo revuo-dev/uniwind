@@ -252,3 +252,8 @@
     padding-right: calc(env(safe-area-inset-right) + --spacing(--value(integer)));
     padding-right: calc(env(safe-area-inset-right) + --value([length]));
 }
+
+@custom-variant light (&:where(.light, .light *));
+@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant premium (&:where(.premium, .premium *));
+
