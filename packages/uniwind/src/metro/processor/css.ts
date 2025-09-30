@@ -1,4 +1,4 @@
-import { BackgroundPosition, OverflowKeyword } from 'lightningcss'
+import { OverflowKeyword } from 'lightningcss'
 import { Logger } from '../logger'
 import { DeclarationValues, ProcessMetaValues } from '../types'
 import { isDefined, pipe } from '../utils'
@@ -206,6 +206,8 @@ export class CSS {
                         this.Processor.Color.processColor(declarationValue.color),
                         declarationValue.position ? this.processValue(declarationValue.position) : null,
                     ].filter(isDefined).join(' ')
+                case 'side':
+                    return declarationValue.side
                 case 'horizontal':
                 case 'vertical':
                 case 'white-space':
@@ -342,10 +344,6 @@ export class CSS {
                 : 'auto'
         }
 
-        if (this.isBackgroundPosition(declarationValue)) {
-            return ''
-        }
-
         if ('x' in declarationValue && 'y' in declarationValue) {
             return {
                 x: this.processValue(declarationValue.x),
@@ -412,10 +410,6 @@ export class CSS {
 
     private isOverflow(value: any): value is { x: OverflowKeyword; y: OverflowKeyword } {
         return typeof value === 'object' && 'x' in value && ['hidden', 'visible'].includes(value.x)
-    }
-
-    private isBackgroundPosition(value: any): value is BackgroundPosition {
-        return typeof value === 'object' && 'x' in value && 'y' in value && Object.keys(value).length === 2
     }
 
     /**

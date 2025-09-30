@@ -159,6 +159,17 @@ const cssToRNMap: Record<string, (value: any) => Record<string, any>> = {
             borderStyle,
         }
     },
+    transformOrigin: value => {
+        if (typeof value === 'object') {
+            return {
+                transformOrigin: `${value.x} ${value.y}`,
+            }
+        }
+
+        return {
+            transformOrigin: value,
+        }
+    },
 }
 
 export class RN {
