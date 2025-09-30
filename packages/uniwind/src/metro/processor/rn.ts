@@ -1,85 +1,10 @@
 import { addMissingSpaces, isDefined, percentageToFloat, toCamelCase } from '../utils'
 import type { ProcessorBuilder } from './processor'
 
-const cssToRNKeyMap = {
-    marginInline: 'marginHorizontal',
-    marginBlock: 'marginVertical',
-    paddingInline: 'paddingHorizontal',
-    paddingBlock: 'paddingVertical',
-    direction: 'writingDirection',
-    borderBottomRightRadius: 'borderBottomEndRadius',
-    borderBottomLeftRadius: 'borderBottomStartRadius',
-    borderInlineEndColor: 'borderEndColor',
-    borderInlineStartColor: 'borderStartColor',
-    borderTopRightRadius: 'borderTopEndRadius',
-    borderTopLeftRadius: 'borderTopStartRadius',
-    borderInlineEndWidth: 'borderEndWidth',
-    borderInlineStartWidth: 'borderStartWidth',
-    backgroundSize: 'resizeMode',
-} as Record<string, string>
-
-type PositionValues = {
-    top: string
-    right: string
-    bottom: string
-    left: string
-}
-
-type CornerValues = {
-    topLeft: string
-    topRight: string
-    bottomLeft: string
-    bottomRight: string
-}
-
 const cssToRNMap: Record<string, (value: any) => Record<string, any>> = {
-    ...Object.fromEntries(
-        Object.entries(cssToRNKeyMap).map(([key, transformedKey]) => {
-            return [key, value => ({
-                [transformedKey]: value,
-            })]
-        }),
-    ),
-    borderWidth: (value: string | PositionValues) => {
-        if (typeof value === 'string') {
-            return {
-                borderWidth: value,
-            }
-        }
-
+    backgroundSize: value => {
         return {
-            borderTopWidth: value.top,
-            borderRightWidth: value.right,
-            borderBottomWidth: value.bottom,
-            borderLeftWidth: value.left,
-        }
-    },
-    borderColor: (value: string | PositionValues) => {
-        if (typeof value === 'string') {
-            return {
-                borderColor: value,
-            }
-        }
-
-        return {
-            borderTopColor: value.top,
-            borderRightColor: value.right,
-            borderBottomColor: value.bottom,
-            borderLeftColor: value.left,
-        }
-    },
-    borderRadius: (value: string | CornerValues) => {
-        if (typeof value === 'string') {
-            return {
-                borderRadius: value,
-            }
-        }
-
-        return {
-            borderTopLeftRadius: value.topLeft,
-            borderTopRightRadius: value.topRight,
-            borderBottomLeftRadius: value.bottomLeft,
-            borderBottomRightRadius: value.bottomRight,
+            resizeMode: value,
         }
     },
     transitionProperty: (value: string) => {
@@ -175,6 +100,12 @@ const cssToRNMap: Record<string, (value: any) => Record<string, any>> = {
         return {}
     },
     transform: value => {
+        if (typeof value === 'string') {
+            return {
+                transform: value,
+            }
+        }
+
         if (typeof value === 'object') {
             return Object.keys(value).length === 0
                 ? { transform: [] }
@@ -189,6 +120,36 @@ const cssToRNMap: Record<string, (value: any) => Record<string, any>> = {
             '--uniwind-em': value,
         }
     },
+    borderInlineWidth: value => {
+        const borderWidth = typeof value === 'object'
+            ? Object.values(value)[0]
+            : value
+
+        return {
+            borderLeftWidth: borderWidth,
+            borderRightWidth: borderWidth,
+        }
+    },
+    borderBlockWidth: value => {
+        const borderWidth = typeof value === 'object'
+            ? Object.values(value)[0]
+            : value
+
+        return {
+            borderTopWidth: borderWidth,
+            borderBottomWidth: borderWidth,
+        }
+    },
+    borderInlineStyle: value => {
+        return {
+            borderStyle: value,
+        }
+    },
+    borderBlockStyle: value => {
+        return {
+            borderStyle: value,
+        }
+    },
 }
 
 export class RN {
@@ -199,10 +160,50 @@ export class RN {
             ? property
             : toCamelCase(property)
 
-        const rn = cssToRNMap[transformedProperty]?.(
+        const rn = this.transformProperty(
+            transformedProperty,
             typeof value === 'string' ? addMissingSpaces(value) : value,
-        ) ?? { [transformedProperty]: value }
+        )
 
         return Object.entries(rn).filter(([, value]) => isDefined(value)) as Array<[string, any]>
+    }
+
+    private transformProperty(property: string, value: any) {
+        if (property in cssToRNMap) {
+            return cssToRNMap[property]!(value)
+        }
+
+        if (typeof value === 'object') {
+            const properties = Object.keys(value)
+
+            if (properties.every(property => ['start', 'end'].includes(property))) {
+                return {
+                    [`${property}Start`]: value.start,
+                    [`${property}End`]: value.end,
+                }
+            }
+
+            if (properties.every(property => ['top', 'right', 'bottom', 'left'].includes(property))) {
+                return {
+                    [`${property}Top`]: value.top,
+                    [`${property}Right`]: value.right,
+                    [`${property}Bottom`]: value.bottom,
+                    [`${property}Left`]: value.left,
+                }
+            }
+
+            if (properties.every(property => ['topLeft', 'topRight', 'bottomRight', 'bottomLeft'].includes(property))) {
+                return {
+                    [`${property}TopLeft`]: value.topLeft,
+                    [`${property}TopRight`]: value.topRight,
+                    [`${property}BottomRight`]: value.bottomRight,
+                    [`${property}BottomLeft`]: value.bottomLeft,
+                }
+            }
+        }
+
+        return {
+            [property]: value,
+        }
     }
 }

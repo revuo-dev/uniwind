@@ -128,6 +128,10 @@ export class Functions {
             return '""'
         }
 
+        if (['skewX', 'skewY'].includes(fn.name)) {
+            return `${fn.name}(${this.Processor.CSS.processValue(fn.arguments)})`
+        }
+
         this.logger.error(`Unsupported function - ${fn.name}`)
 
         return fn.name

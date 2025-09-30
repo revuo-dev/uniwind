@@ -165,6 +165,16 @@ export class UniwindStoreBuilder {
             result.boxShadow = parseBoxShadow(result.boxShadow)
         }
 
+        if (result.visibility !== undefined && result.visibility === 'hidden') {
+            result.display = 'none'
+        }
+
+        if (
+            result.borderStyle !== undefined && result.borderWidth !== undefined && result.borderColor === undefined
+        ) {
+            result.borderColor = '#000000'
+        }
+
         parseTransformsMutation(result)
 
         if (result.experimental_backgroundImage !== undefined) {

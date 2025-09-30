@@ -365,6 +365,36 @@ export class CSS {
             ].filter(isDefined).join(' ')
         }
 
+        if ('blockStart' in declarationValue) {
+            const startValue = this.processValue(declarationValue.blockStart)
+            const endValue = this.processValue(declarationValue.blockEnd)
+
+            return {
+                start: startValue,
+                end: endValue,
+            }
+        }
+
+        if ('inlineStart' in declarationValue) {
+            const startValue = this.processValue(declarationValue.inlineStart)
+            const endValue = this.processValue(declarationValue.inlineEnd)
+
+            return {
+                start: startValue,
+                end: endValue,
+            }
+        }
+
+        if ('start' in declarationValue) {
+            const startValue = this.processValue(declarationValue.start)
+            const endValue = this.processValue(declarationValue.end)
+
+            return {
+                start: startValue,
+                end: endValue,
+            }
+        }
+
         this.logger.error(
             [
                 `Unsupported value ${JSON.stringify(declarationValue)}`,
