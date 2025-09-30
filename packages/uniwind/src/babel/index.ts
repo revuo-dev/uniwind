@@ -39,8 +39,8 @@ export default ({ types }: { types: typeof t }): PluginObj => {
 
                 if (
                     node.source.value !== 'react-native'
-                    || state.filename?.includes('uniwind/src/components')
-                    || state.filename?.includes('uniwind/components')
+                    || state.filename?.includes('/uniwind/src/components')
+                    || state.filename?.includes('node_modules/uniwind/components')
                 ) {
                     return
                 }
