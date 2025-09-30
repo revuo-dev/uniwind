@@ -1,10 +1,11 @@
 export enum StyleDependency {
-    Theme = 1,
-    Dimensions = 2,
-    Orientation = 3,
-    Insets = 4,
-    FontScale = 5,
-    Rtl = 6,
+    ColorScheme = 1,
+    Theme = 2,
+    Dimensions = 3,
+    Orientation = 4,
+    Insets = 5,
+    FontScale = 6,
+    Rtl = 7,
 }
 
 export const enum Orientation {

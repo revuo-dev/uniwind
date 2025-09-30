@@ -7,6 +7,7 @@ import { UniwindRuntime } from './runtime'
 export class UniwindStoreBuilder {
     stylesheets = {} as StyleSheets
     listeners = {
+        [StyleDependency.ColorScheme]: new Set<() => void>(),
         [StyleDependency.Theme]: new Set<() => void>(),
         [StyleDependency.Dimensions]: new Set<() => void>(),
         [StyleDependency.Orientation]: new Set<() => void>(),
