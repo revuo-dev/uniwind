@@ -170,7 +170,7 @@ export class UniwindStoreBuilder {
         }
 
         if (
-            result.borderStyle !== undefined && result.borderWidth !== undefined && result.borderColor === undefined
+            result.borderStyle !== undefined && result.borderColor === undefined
         ) {
             result.borderColor = '#000000'
         }

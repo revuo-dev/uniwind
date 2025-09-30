@@ -150,6 +150,15 @@ const cssToRNMap: Record<string, (value: any) => Record<string, any>> = {
             borderStyle: value,
         }
     },
+    borderStyle: value => {
+        const borderStyle = typeof value === 'object'
+            ? Object.values(value)[0]
+            : value
+
+        return {
+            borderStyle,
+        }
+    },
 }
 
 export class RN {
@@ -175,29 +184,32 @@ export class RN {
 
         if (typeof value === 'object') {
             const properties = Object.keys(value)
+            // border properties are border{X}Color instead of borderColor{X}
+            const propertyEnd = property.split('border').at(-1) ?? ''
+            const transformedProperty = property.replace(propertyEnd, '')
 
             if (properties.every(property => ['start', 'end'].includes(property))) {
                 return {
-                    [`${property}Start`]: value.start,
-                    [`${property}End`]: value.end,
+                    [`${transformedProperty}Start${propertyEnd}`]: value.start,
+                    [`${transformedProperty}End${propertyEnd}`]: value.end,
                 }
             }
 
             if (properties.every(property => ['top', 'right', 'bottom', 'left'].includes(property))) {
                 return {
-                    [`${property}Top`]: value.top,
-                    [`${property}Right`]: value.right,
-                    [`${property}Bottom`]: value.bottom,
-                    [`${property}Left`]: value.left,
+                    [`${transformedProperty}Top${propertyEnd}`]: value.top,
+                    [`${transformedProperty}Right${propertyEnd}`]: value.right,
+                    [`${transformedProperty}Bottom${propertyEnd}`]: value.bottom,
+                    [`${transformedProperty}Left${propertyEnd}`]: value.left,
                 }
             }
 
             if (properties.every(property => ['topLeft', 'topRight', 'bottomRight', 'bottomLeft'].includes(property))) {
                 return {
-                    [`${property}TopLeft`]: value.topLeft,
-                    [`${property}TopRight`]: value.topRight,
-                    [`${property}BottomRight`]: value.bottomRight,
-                    [`${property}BottomLeft`]: value.bottomLeft,
+                    [`${transformedProperty}TopLeft${propertyEnd}`]: value.topLeft,
+                    [`${transformedProperty}TopRight${propertyEnd}`]: value.topRight,
+                    [`${transformedProperty}BottomRight${propertyEnd}`]: value.bottomRight,
+                    [`${transformedProperty}BottomLeft${propertyEnd}`]: value.bottomLeft,
                 }
             }
         }
