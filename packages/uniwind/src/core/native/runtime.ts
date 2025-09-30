@@ -23,4 +23,5 @@ export const UniwindRuntime = {
         right: 0,
     },
     colorMix,
+    cubicBezier: () => '',
 } as UniwindRuntimeType
