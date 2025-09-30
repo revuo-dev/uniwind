@@ -12,11 +12,12 @@ export type Config = {
     adaptiveThemes?: boolean
 }
 
+const SYSTEM_THEME = 'system' as const
+
 class UniwindConfigBuilder {
-    #themes: UserThemes = ['light', 'dark']
-    #hasAdaptiveThemes = true
-    #colorScheme = Appearance.getColorScheme() ?? ColorScheme.Light
-    #currentTheme = this.#colorScheme as ThemeName
+    private hasAdaptiveThemes = true
+    private colorScheme = Appearance.getColorScheme() ?? ColorScheme.Light
+    #currentTheme = this.colorScheme as ThemeName
 
     constructor() {
         if (Platform.OS === 'web') {
@@ -27,7 +28,7 @@ class UniwindConfigBuilder {
             const colorScheme = event.colorScheme ?? ColorScheme.Light
             const prevTheme = this.#currentTheme
 
-            if (this.#hasAdaptiveThemes && prevTheme !== colorScheme) {
+            if (this.hasAdaptiveThemes && prevTheme !== colorScheme) {
                 this.#currentTheme = colorScheme
                 this.emitThemeChange()
             }
@@ -38,17 +39,15 @@ class UniwindConfigBuilder {
         return this.#currentTheme
     }
 
-    get hasAdaptiveThemes() {
-        return this.#hasAdaptiveThemes
+    private get haveLightAndDarkThemes() {
+        return this.themes.includes('light') && this.themes.includes('dark')
     }
 
-    private get haveLightAndDarkThemes() {
-        return this.#themes.includes('light') && this.#themes.includes('dark')
+    private get themes() {
+        return globalThis.__uniwindThemes__ ?? ['light', 'dark']
     }
 
     configure(config: Config) {
-        this.#themes = globalThis.__uniwindThemes__ ?? ['light', 'dark']
-
         if (config.adaptiveThemes && !this.haveLightAndDarkThemes) {
             throw new Error(`Uniwind: You're trying to enable adaptive themes, but you did not register 'light' and 'dark' themes.`)
         }
@@ -57,11 +56,11 @@ class UniwindConfigBuilder {
             throw new Error(`"Uniwind: You're trying to set initial theme and enable adaptiveThemes, but these options are mutually exclusive."`)
         }
 
-        if (config.initialTheme !== undefined && !this.#themes.includes(config.initialTheme)) {
+        if (config.initialTheme !== undefined && !this.themes.includes(config.initialTheme)) {
             throw new Error(`Uniwind: You're trying to set '${config.initialTheme}' as initial theme, but it was not registered.`)
         }
 
-        if (config.initialTheme === undefined && !config.adaptiveThemes && this.#themes.length > 1) {
+        if (config.initialTheme === undefined && !config.adaptiveThemes && this.themes.length > 1) {
             throw new Error(`Uniwind: You need to set initial theme or enable adaptive themes.`)
         }
 
@@ -70,19 +69,24 @@ class UniwindConfigBuilder {
             this.emitThemeChange()
         }
 
-        this.#hasAdaptiveThemes = config.adaptiveThemes ?? false
+        this.hasAdaptiveThemes = config.adaptiveThemes ?? false
     }
 
-    setAdaptiveThemes(enabled: boolean) {
-        if (enabled) {
+    // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+    setTheme(theme: ThemeName | typeof SYSTEM_THEME) {
+        if (theme === this.#currentTheme) {
+            return
+        }
+
+        const prevTheme = this.#currentTheme
+
+        if (theme === SYSTEM_THEME) {
             if (!this.haveLightAndDarkThemes) {
-                throw new Error(`Uniwind: You're trying to enable adaptive themes, but you did not register 'light' and 'dark' themes.`)
+                throw new Error(`Uniwind: You're trying to setTheme to '${SYSTEM_THEME}', but you did not register 'light' and 'dark' themes.`)
             }
 
-            const prevTheme = this.#currentTheme
-
-            this.#hasAdaptiveThemes = true
-            this.#currentTheme = this.#colorScheme
+            this.hasAdaptiveThemes = true
+            this.#currentTheme = this.colorScheme
 
             if (prevTheme !== this.#currentTheme) {
                 this.emitThemeChange()
@@ -91,28 +95,20 @@ class UniwindConfigBuilder {
             return
         }
 
-        this.#hasAdaptiveThemes = false
-    }
-
-    setTheme(theme: ThemeName) {
-        if (theme === this.#currentTheme) {
-            return
-        }
-
-        if (this.hasAdaptiveThemes) {
-            throw new Error(`Uniwind: You're trying to setTheme to '${theme}', but adaptive themes are enabled.`)
-        }
-
-        if (!this.#themes.includes(theme)) {
+        if (!this.themes.includes(theme)) {
             throw new Error(`Uniwind: You're trying to setTheme to '${theme}', but it was not registered.`)
         }
 
+        this.hasAdaptiveThemes = false
         this.#currentTheme = theme
-        this.emitThemeChange()
+
+        if (prevTheme !== this.#currentTheme) {
+            this.emitThemeChange()
+        }
     }
 
     private emitThemeChange() {
-        themeChange(this.#currentTheme, this.#themes)
+        themeChange(this.#currentTheme, this.themes)
     }
 }
 
