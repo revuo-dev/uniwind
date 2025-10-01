@@ -22,7 +22,7 @@ type ApplyUniwind<TProps extends AnyObject> =
 type ApplyUniwindOptions<TProps extends AnyObject, TOptions extends { [K in keyof TProps]?: OptionMapping }> =
     & {
         // @ts-expect-error TS isn't smart enough to infer this
-        [K in keyof TOptions as TOptions[K] extends undefined ? never : TOptions[K]['toClassName']]?: string
+        [K in keyof TOptions as TOptions[K] extends undefined ? never : TOptions[K]['fromClassName']]?: string
     }
     & TProps
 

@@ -3,11 +3,13 @@ import { copyComponentProperties } from '../utils'
 import { toRNWClassName } from './rnw'
 
 export const FlatList = copyComponentProperties(RNFlatList, (props: FlatListProps<unknown>) => {
+    const hasSingleColumn = !('numColumns' in props) || props.numColumns === 1
+
     return (
         <RNFlatList
             {...props}
             style={[toRNWClassName(props.className), props.style]}
-            columnWrapperStyle={[toRNWClassName(props.columnWrapperClassName), props.columnWrapperStyle]}
+            columnWrapperStyle={hasSingleColumn ? undefined : [toRNWClassName(props.columnWrapperClassName), props.columnWrapperStyle]}
             contentContainerStyle={[toRNWClassName(props.contentContainerClassName), props.contentContainerStyle]}
             ListFooterComponentStyle={[toRNWClassName(props.ListFooterComponentClassName), props.ListFooterComponentStyle]}
             ListHeaderComponentStyle={[toRNWClassName(props.ListHeaderComponentClassName), props.ListHeaderComponentStyle]}

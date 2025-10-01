@@ -10,12 +10,13 @@ export const FlatList = copyComponentProperties(RNFlatList, (props: FlatListProp
     const styleListFooterComponent = useStyle(props.ListFooterComponentClassName)
     const styleListHeaderComponent = useStyle(props.ListHeaderComponentClassName)
     const endFillColor = useUniwindAccent(props.endFillColorClassName)
+    const hasSingleColumn = !('numColumns' in props) || props.numColumns === 1
 
     return (
         <RNFlatList
             {...props}
             style={[style, props.style]}
-            columnWrapperStyle={[styleColumnWrapper, props.columnWrapperStyle]}
+            columnWrapperStyle={hasSingleColumn ? undefined : [styleColumnWrapper, props.columnWrapperStyle]}
             contentContainerStyle={[styleContentContainer, props.contentContainerStyle]}
             ListFooterComponentStyle={[styleListFooterComponent, props.ListFooterComponentStyle]}
             ListHeaderComponentStyle={[styleListHeaderComponent, props.ListHeaderComponentStyle]}
