@@ -32,7 +32,7 @@ export class Functions {
         try {
             const tokens = value.split(/[\s+-]+/)
 
-            if (tokens.some(token => !token.includes('%'))) {
+            if (tokens.some(token => /[A-Za-z]/g.test(token))) {
                 this.logger.error(`Invalid calc, you can't mix percentage and non-percentage values`)
 
                 return value
