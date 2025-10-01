@@ -188,7 +188,10 @@ export const withUniwindConfig = (
                 if (platform) {
                     const virtualFile = await getVirtualFile(platform)
 
-                    fileBuffer = Buffer.from(`${virtualFile}${uniwind.injectedThemesScript}`)
+                    fileBuffer = Buffer.from([
+                        virtualFile,
+                        platform !== Platform.Web ? uniwind.injectedThemesScript : '',
+                    ].join(''))
                 }
             }
 
