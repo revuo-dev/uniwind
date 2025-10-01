@@ -70,7 +70,7 @@ const withAutoUniwind = (Component: Component<AnyObject>) => (props: AnyObject) 
 
 const withManualUniwind = (Component: Component<AnyObject>, options: Record<PropertyKey, OptionMapping>) => (props: AnyObject) => {
     const { generatedProps, classNames } = Object.entries(options).reduce((acc, [propName, option]) => {
-        const className = props[option.toClassName]
+        const className = props[option.fromClassName]
 
         if (className === undefined) {
             return acc

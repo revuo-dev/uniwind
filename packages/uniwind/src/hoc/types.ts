@@ -29,7 +29,7 @@ type ApplyUniwindOptions<TProps extends AnyObject, TOptions extends { [K in keyo
 export type Component<T extends AnyObject> = React.JSXElementConstructor<T>
 
 export type OptionMapping = {
-    toClassName: string
+    fromClassName: string
     styleProperty?: keyof RNStyle
 }
 
