@@ -196,7 +196,9 @@ export class RN {
         if (typeof value === 'object') {
             const properties = Object.keys(value)
             // border properties are border{X}Color instead of borderColor{X}
-            const propertyEnd = property.split('border').at(-1) ?? ''
+            const propertyEnd = property.includes('border')
+                ? property.split('border').at(-1) ?? ''
+                : ''
             const transformedProperty = property.replace(propertyEnd, '')
 
             if (properties.every(property => ['start', 'end'].includes(property))) {
