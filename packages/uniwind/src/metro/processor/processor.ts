@@ -9,7 +9,9 @@ import { Var } from './var'
 
 export class ProcessorBuilder {
     stylesheets = {} as Record<string, Array<any>>
-    vars = {} as Record<string, any>
+    vars = {
+        '--uniwind-em': 'rt.rem * 1',
+    } as Record<string, any>
     CSS = new CSS(this)
     RN = new RN(this)
     Var = new Var(this)
