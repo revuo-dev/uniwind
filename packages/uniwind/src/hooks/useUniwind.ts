@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Uniwind } from '../core'
+import { ThemeName, Uniwind } from '../core'
 import { CSSListener } from '../core/web'
 
 export const useUniwind = () => {
@@ -14,6 +14,6 @@ export const useUniwind = () => {
     }, [])
 
     return {
-        theme,
+        theme: theme as ThemeName,
     }
 }
