@@ -106,7 +106,7 @@ const withManualUniwind = (Component: Component<AnyObject>, options: Record<Prop
         const dispose = UniwindStore.subscribe(rerender, deps)
 
         return dispose
-    }, deps)
+    }, [deps])
 
     return (
         <Component
