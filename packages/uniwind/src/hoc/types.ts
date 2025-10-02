@@ -10,7 +10,7 @@ type ColorPropToClass<K extends PropertyKey> = K extends 'color' ? 'colorClassNa
     : K extends `${string}Color` | `${string}color${string}` ? `${K}ClassName`
     : never
 
-type ApplyUniwind<TProps extends AnyObject> =
+export type ApplyUniwind<TProps extends AnyObject> =
     & {
         [K in keyof TProps as StyleToClass<K>]?: string
     }
@@ -19,7 +19,7 @@ type ApplyUniwind<TProps extends AnyObject> =
     }
     & TProps
 
-type ApplyUniwindOptions<TProps extends AnyObject, TOptions extends { [K in keyof TProps]?: OptionMapping }> =
+export type ApplyUniwindOptions<TProps extends AnyObject, TOptions extends { [K in keyof TProps]?: OptionMapping }> =
     & {
         // @ts-expect-error TS isn't smart enough to infer this
         [K in keyof TOptions as TOptions[K] extends undefined ? never : TOptions[K]['fromClassName']]?: string
