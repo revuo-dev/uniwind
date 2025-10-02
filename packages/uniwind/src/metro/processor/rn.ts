@@ -201,6 +201,13 @@ export class RN {
                 : ''
             const transformedProperty = property.replace(propertyEnd, '')
 
+            if (properties.every(property => ['row', 'column'].includes(property))) {
+                return {
+                    rowGap: value.row,
+                    columnGap: value.column,
+                }
+            }
+
             if (properties.every(property => ['start', 'end'].includes(property))) {
                 return {
                     [`${transformedProperty}Start${propertyEnd}`]: value.start,

@@ -1,4 +1,5 @@
 import type {
+    AbsoluteFontWeight,
     Declaration,
     GradientItemFor_DimensionPercentageFor_LengthValue,
     LineDirection,
@@ -67,6 +68,7 @@ export type DeclarationValues =
     | MathFunctionFor_Length
     | LineDirection
     | GradientItemFor_DimensionPercentageFor_LengthValue
+    | AbsoluteFontWeight
 
 export type ProcessMetaValues = {
     propertyName?: string

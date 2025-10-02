@@ -209,7 +209,14 @@ export class CSS {
                 case 'side':
                     return declarationValue.side
                 case 'absolute':
+                    if ('value' in declarationValue) {
+                        return typeof declarationValue.value === 'string'
+                            ? declarationValue.value
+                            : this.processValue(declarationValue.value)
+                    }
+
                     return declarationValue.type
+                case 'weight':
                 case 'horizontal':
                 case 'vertical':
                 case 'white-space':
@@ -392,6 +399,13 @@ export class CSS {
             return {
                 start: startValue,
                 end: endValue,
+            }
+        }
+
+        if ('row' in declarationValue) {
+            return {
+                row: this.processValue(declarationValue.row),
+                column: this.processValue(declarationValue.column),
             }
         }
 
