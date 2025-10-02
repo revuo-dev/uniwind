@@ -13,7 +13,7 @@ export class Functions {
             case 'sum': {
                 const sum = calc.value.map(x => this.processCalc(x)).join(' + ')
 
-                return sum.includes('%') ? this.tryPercentageEval(sum) : sum
+                return this.tryEval(sum)
             }
             case 'value':
                 return this.Processor.CSS.processValue(calc.value)
@@ -25,27 +25,6 @@ export class Functions {
                 this.logger.error(`Unsupported calc type - ${calc.type}`)
 
                 return ''
-        }
-    }
-
-    tryPercentageEval(value: string) {
-        try {
-            const tokens = value.split(/[\s+-]+/)
-
-            if (tokens.some(token => /[A-Za-z]/g.test(token))) {
-                this.logger.error(`Invalid calc, you can't mix percentage and non-percentage values`)
-
-                return value
-            }
-
-            const numericValue = value.replace(/%/g, '')
-
-            // eslint-disable-next-line @typescript-eslint/no-implied-eval, no-new-func
-            return new Function(`return ${numericValue} + '%'`)()
-        } catch {
-            this.logger.error(`Invalid calc ${value}`)
-
-            return value
         }
     }
 
@@ -61,13 +40,7 @@ export class Functions {
 
             return pipe(calc)(
                 String,
-                x => {
-                    if (x.includes('%')) {
-                        return this.Processor.Functions.tryPercentageEval(x)
-                    }
-
-                    return x
-                },
+                x => this.Processor.Functions.tryEval(x),
             )
         }
 
@@ -152,6 +125,33 @@ export class Functions {
         const values = value.map(x => this.processCalc(x)).join(' , ')
 
         return `Math.${name}( ${values} )`
+    }
+
+    private tryEval(value: string) {
+        const units = Array.from(value.match(/%|deg|rad|grad|turn/g) ?? [])
+
+        if (units.length === 0) {
+            return value
+        }
+
+        if (new Set(units).size !== 1) {
+            this.logger.error(`Invalid calc, you can't mix multiple units`)
+
+            return value
+        }
+
+        const unit = units.at(0) ?? ''
+
+        try {
+            const numericValue = value.replace(new RegExp(unit, 'g'), '')
+
+            // eslint-disable-next-line @typescript-eslint/no-implied-eval, no-new-func
+            return new Function(`return ${numericValue} + '${unit}'`)()
+        } catch {
+            this.logger.error(`Invalid calc ${value}`)
+
+            return value
+        }
     }
 
     private processColorMix(fn: FunctionType) {
