@@ -10,7 +10,7 @@ type InjectThemesConfig = {
 
 export const injectThemes = ({
     themes = ['light', 'dark'],
-    dtsPath = 'uniwind.d.ts',
+    dtsPath = 'uniwind-types.d.ts',
     input,
 }: InjectThemesConfig) => {
     const stringifiedThemes = `[${themes.map(theme => `'${theme}'`).join(', ')}]`
