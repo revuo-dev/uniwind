@@ -189,6 +189,10 @@ export const withUniwindConfig = (
         ) => {
             const isVirtualFile = uniwind.virtualModules.has(filePath)
 
+            if (filePath.endsWith('/components/web/metro-injected.js')) {
+                fileBuffer = Buffer.from(uniwind.injectedThemesScript)
+            }
+
             if (isVirtualFile) {
                 const platform = getPlatformFromVirtualPath(filePath)
 

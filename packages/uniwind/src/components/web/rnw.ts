@@ -1,4 +1,5 @@
 import '../../core/config'
+import './metro-injected'
 
 const moveCssRulesToUtilitiesLayer = (sourceSheet: CSSStyleSheet) => {
     const layerRuleIndex = sourceSheet.insertRule(
