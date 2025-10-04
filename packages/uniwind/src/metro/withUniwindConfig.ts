@@ -8,7 +8,7 @@ import { getSources } from './getSources'
 import { injectThemes } from './injectThemes'
 import { nativeResolver, webResolver } from './resolvers'
 import { DeepMutable, ExtendedBundler, ExtendedFileSystem, FileChangeEvent, Platform, UniwindConfig } from './types'
-import { areSetsEqual } from './utils'
+import { areSetsEqual, uniq } from './utils'
 
 const getVirtualPath = (platform: string) => `${platform}.uniwind.${platform === Platform.Web ? 'css' : 'js'}`
 const getPlatformFromVirtualPath = (path: string) => {
@@ -23,6 +23,12 @@ export const withUniwindConfig = (
     config: DeepMutable<MetroConfig>,
     uniwindConfig: UniwindConfig,
 ) => {
+    uniwindConfig.themes = uniq([
+        'light',
+        'dark',
+        ...(uniwindConfig.extraThemes ?? []),
+    ])
+
     if (typeof uniwindConfig === 'undefined') {
         throw new Error('Uniwind: You need to pass second parameter to withUniwindConfig')
     }
@@ -214,7 +220,7 @@ export const withUniwindConfig = (
             cssPath: uniwind.input,
             css: uniwind.cssFile,
             platform,
-            themes: uniwindConfig.themes ?? ['light', 'dark'],
+            themes: uniwindConfig.themes,
         })
 
         uniwind.virtualModules.set(getVirtualPath(platform), virtualFile)
