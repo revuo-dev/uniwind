@@ -24,13 +24,17 @@
     "exports": {
         ".": {
             "style": "./uniwind.css",
+            "types": "./dist/module/index.d.ts",
             "react-native": "./src/index.ts",
             "import": "./dist/module/index.js",
-            "types": "./dist/module/index.d.ts",
             "default": "./dist/common/index.js"
         },
-        "./components": "./src/components/index.ts",
+        "./components": {
+            "types": "./no-types.d.ts",
+            "default": "./src/components/index.ts"
+        },
         "./components/*": {
+            "types": "./no-types.d.ts",
             "react-native": "./src/components/native/*.tsx",
             "import": "./dist/module/components/web/*.js",
             "default": "./dist/common/components/web/*.js"
