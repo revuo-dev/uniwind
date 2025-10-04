@@ -214,6 +214,7 @@ export const withUniwindConfig = (
             cssPath: uniwind.input,
             css: uniwind.cssFile,
             platform,
+            themes: uniwindConfig.themes ?? ['light', 'dark'],
         })
 
         uniwind.virtualModules.set(getVirtualPath(platform), virtualFile)
