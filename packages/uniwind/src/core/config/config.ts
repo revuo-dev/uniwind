@@ -48,10 +48,6 @@ class UniwindConfigBuilder {
 
     // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
     setTheme(theme: ThemeName | typeof SYSTEM_THEME) {
-        if (theme === this.#currentTheme) {
-            return
-        }
-
         const prevTheme = this.#currentTheme
 
         if (theme === SYSTEM_THEME) {
