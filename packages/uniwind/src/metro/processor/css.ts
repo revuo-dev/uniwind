@@ -218,6 +218,8 @@ export class CSS {
                     return declarationValue.type
                 case 'hash':
                     return `#${declarationValue.value}`
+                case 'line-style':
+                    return declarationValue.value
                 case 'weight':
                 case 'horizontal':
                 case 'vertical':
