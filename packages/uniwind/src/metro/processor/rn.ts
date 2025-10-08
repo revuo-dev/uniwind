@@ -170,6 +170,9 @@ const cssToRNMap: Record<string, (value: any) => Record<string, any>> = {
             transformOrigin: value,
         }
     },
+    fontVariantNumeric: value => ({
+        fontVariant: value,
+    }),
 }
 
 export class RN {

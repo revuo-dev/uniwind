@@ -1,7 +1,7 @@
 import { Dimensions } from 'react-native'
 import { Orientation, StyleDependency } from '../../types'
 import { RNStyle, Style, StyleSheets } from '../types'
-import { parseBoxShadow, parseTransformsMutation, resolveGradient } from './parsers'
+import { parseBoxShadow, parseFontVariant, parseTransformsMutation, resolveGradient } from './parsers'
 import { UniwindRuntime } from './runtime'
 
 export class UniwindStoreBuilder {
@@ -173,6 +173,10 @@ export class UniwindStoreBuilder {
             result.borderStyle !== undefined && result.borderColor === undefined
         ) {
             result.borderColor = '#000000'
+        }
+
+        if (result.fontVariant !== undefined) {
+            result.fontVariant = parseFontVariant(result.fontVariant)
         }
 
         parseTransformsMutation(result)
