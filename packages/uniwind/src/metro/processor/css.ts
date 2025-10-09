@@ -226,6 +226,8 @@ export class CSS {
                     return ')'
                 case 'light-dark':
                     return `rt.lightDark( ${this.processValue(declarationValue.light)}, ${this.processValue(declarationValue.dark)} )`
+                case 'sticky':
+                    return ''
                 case 'weight':
                 case 'horizontal':
                 case 'vertical':
