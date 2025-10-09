@@ -24,9 +24,6 @@ export const Text = copyComponentProperties(RNText, (props: TextProps) => {
             style={[style, props.style]}
             selectionColor={props.selectionColor ?? selectionColor}
             numberOfLines={(style as StyleWithWebkitLineClamp).WebkitLineClamp ?? props.numberOfLines}
-            // Without onPress function Text is not clickable, so onPressIn and onPressOut are not working
-            onPress={event => props.onPress?.(event)}
-            suppressHighlighting={props.onPress ? props.suppressHighlighting : true}
             onPressIn={event => {
                 setIsPressed(true)
                 props.onPressIn?.(event)
