@@ -92,7 +92,7 @@ export const transform = async (
         themes: uniwindOptions.themes,
     })
 
-    Buffer.from([
+    data = Buffer.from([
         virtualFile,
         platform !== Platform.Web ? injectThemes(uniwindOptions) : '',
     ].join(''))
