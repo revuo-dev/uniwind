@@ -10,9 +10,10 @@ import { nativeResolver, webResolver } from './resolvers'
 import { DeepMutable, ExtendedBundler, ExtendedFileSystem, FileChangeEvent, Platform, UniwindConfig } from './types'
 import { areSetsEqual, uniq } from './utils'
 
-const getVirtualPath = (platform: string) => `${platform}.uniwind.${platform === Platform.Web ? 'css' : 'js'}`
+const cacheDir = path.join(__dirname, '.cache')
+const getVirtualPath = (platform: string) => path.join(cacheDir, `${platform}.uniwind.${platform === Platform.Web ? 'css' : 'js'}`)
 const getPlatformFromVirtualPath = (path: string) => {
-    const [, platform] = path.match(/^(\w+)\.uniwind\./) ?? []
+    const [, platform] = path.match(/(\w+)\.uniwind\./) ?? []
 
     return platform as Platform | undefined
 }
@@ -23,6 +24,11 @@ export const withUniwindConfig = (
     config: DeepMutable<MetroConfig>,
     uniwindConfig: UniwindConfig,
 ) => {
+    if (!fs.existsSync(cacheDir)) {
+        fs.mkdirSync(cacheDir)
+    }
+
+    platforms.forEach(platform => fs.writeFileSync(getVirtualPath(platform), ''))
     uniwindConfig.themes = uniq([
         'light',
         'dark',
