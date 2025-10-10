@@ -65,7 +65,7 @@
         "metro",
         "uniwind.css",
         "types.d.ts",
-        "README.md"
+        "readme.md"
     ],
     "dependencies": {
         "@tailwindcss/node": "4.1.14",
