@@ -31,9 +31,14 @@ export type DeepMutable<T> = {
 
 export type UniwindConfig = {
     cssEntryFile: string
-    themes: Array<string>
     extraThemes?: Array<string>
     dtsFile?: string
+}
+
+export type UniwindMetroTransformerOptions = {
+    input: string
+    themes: Array<string>
+    dtsPath?: string
 }
 
 export type MediaQueryResolver = {

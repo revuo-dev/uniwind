@@ -1,7 +1,7 @@
 {
     "private": false,
     "name": "uniwind",
-    "version": "1.0.0-beta.5",
+    "version": "1.0.0-beta.6",
     "description": "The fastest Tailwind bindings for React Native",
     "homepage": "https://github.com/Unistyles-OSS/uniwind",
     "author": "UnistylesOSS",
@@ -62,8 +62,8 @@
         "culori": "4.0.2"
     },
     "peerDependencies": {
-        "react": ">=19.0.0",
-        "react-native": ">=0.81.0",
+        "react": ">=19",
+        "react-native": ">=0.81",
         "tailwindcss": ">=4",
         "postcss": ">=8",
         "chalk": ">=2",
@@ -74,11 +74,13 @@
         "@types/postcss-js": "4.0.4",
         "@types/culori": "4.0.1",
         "typescript": "5.9.3",
-        "metro-config": "0.82.5",
+        "metro-config": "0.83.3",
         "@babel/core": "7.28.4",
         "@babel/types": "7.28.4",
         "dpdm": "3.14.0",
         "unbuild": "3.6.1",
-        "lightningcss": "1.30.2"
+        "lightningcss": "1.30.2",
+        "metro-transform-worker": "0.83.3",
+        "@expo/metro-config": "54.0.6"
     }
 }

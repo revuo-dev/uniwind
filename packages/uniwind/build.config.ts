@@ -44,6 +44,11 @@ export default defineBuildConfig({
             name: 'metro/index',
         },
         {
+            builder: 'rollup',
+            input: './src/metro/expo-transformer.ts',
+            name: 'metro/expo-transformer',
+        },
+        {
             builder: 'mkdist',
             input: './src/metro',
             outDir: 'dist/metro',
