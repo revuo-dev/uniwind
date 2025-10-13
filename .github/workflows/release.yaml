@@ -97,22 +97,21 @@ jobs:
           VERSION="${{ steps.package_version.outputs.version }}"
           PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
 
+          # Generate release notes file
+          echo "## What's Changed" > release_notes.txt
+          echo "" >> release_notes.txt
+
           if [ -z "$PREV_TAG" ]; then
             echo "No previous tag found, using all commits"
-            COMMITS=$(git log --pretty=format:"- %s (%h)" --no-merges)
+            git log --pretty=format:"- %s (%h)" --no-merges >> release_notes.txt
           else
             echo "Generating changelog from $PREV_TAG to HEAD"
-            COMMITS=$(git log $PREV_TAG..HEAD --pretty=format:"- %s (%h)" --no-merges)
+            git log $PREV_TAG..HEAD --pretty=format:"- %s (%h)" --no-merges >> release_notes.txt
           fi
 
-          NOTES="## What's Changed
+          echo "" >> release_notes.txt
+          echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV_TAG}...v${VERSION}" >> release_notes.txt
 
-$COMMITS
-
-**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV_TAG}...v${VERSION}"
-
-          # Save to file for multiline handling
-          echo "$NOTES" > release_notes.txt
           echo "notes_file=release_notes.txt" >> $GITHUB_OUTPUT
 
       - name: Commit version bump (if version was updated)
