@@ -98,7 +98,7 @@ jobs:
               fi
 
               # Update package.json
-              bun version --no-git-tag-version "$NEW_VERSION"
+              sed -i "s/\"version\": \"$CURRENT_VERSION\"/\"version\": \"$NEW_VERSION\"/" package.json
               echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
               echo "version_changed=true" >> $GITHUB_OUTPUT
             else
@@ -108,7 +108,7 @@ jobs:
             fi
           elif [ -n "$VERSION_INPUT" ]; then
             echo "Using specified version: $VERSION_INPUT"
-            bun version --no-git-tag-version "$VERSION_INPUT"
+            sed -i "s/\"version\": \"$CURRENT_VERSION\"/\"version\": \"$VERSION_INPUT\"/" package.json
             echo "version=$VERSION_INPUT" >> $GITHUB_OUTPUT
             echo "version_changed=true" >> $GITHUB_OUTPUT
           else
