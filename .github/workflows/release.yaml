@@ -151,15 +151,15 @@ jobs:
           touch features.txt fixes.txt docs.txt chores.txt refactors.txt others.txt
 
           while IFS= read -r commit; do
-            if [[ $commit =~ ^feat[:(] ]]; then
+            if [[ $commit =~ ^feat(\(|:) ]]; then
               echo "- $commit" >> features.txt
-            elif [[ $commit =~ ^fix[:(] ]]; then
+            elif [[ $commit =~ ^fix(\(|:) ]]; then
               echo "- $commit" >> fixes.txt
-            elif [[ $commit =~ ^docs?[:(] ]]; then
+            elif [[ $commit =~ ^docs?(\(|:) ]]; then
               echo "- $commit" >> docs.txt
-            elif [[ $commit =~ ^chore[:(] ]]; then
+            elif [[ $commit =~ ^chore(\(|:) ]]; then
               echo "- $commit" >> chores.txt
-            elif [[ $commit =~ ^refactor[:(] ]]; then
+            elif [[ $commit =~ ^refactor(\(|:) ]]; then
               echo "- $commit" >> refactors.txt
             else
               echo "- $commit" >> others.txt
