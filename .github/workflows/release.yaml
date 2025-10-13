@@ -138,80 +138,84 @@ jobs:
           VERSION="${{ steps.determine_version.outputs.version }}"
           PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
 
-          # Get commits
+          # Get commits and save to temp file
           if [ -z "$PREV_TAG" ]; then
             echo "No previous tag found, using all commits"
-            COMMITS=$(git log --pretty=format:"%s (%h)" --no-merges)
+            git log --pretty=format:"%s (%h)" --no-merges > commits.txt
           else
             echo "Generating changelog from $PREV_TAG to HEAD"
-            COMMITS=$(git log $PREV_TAG..HEAD --pretty=format:"%s (%h)" --no-merges)
+            git log $PREV_TAG..HEAD --pretty=format:"%s (%h)" --no-merges > commits.txt
           fi
 
-          # Categorize commits
-          FEATURES=""
-          FIXES=""
-          DOCS=""
-          CHORES=""
-          REFACTORS=""
-          OTHERS=""
+          # Categorize commits into separate files
+          touch features.txt fixes.txt docs.txt chores.txt refactors.txt others.txt
 
           while IFS= read -r commit; do
             if [[ $commit =~ ^feat[:(] ]]; then
-              FEATURES="${FEATURES}- ${commit}\n"
+              echo "- $commit" >> features.txt
             elif [[ $commit =~ ^fix[:(] ]]; then
-              FIXES="${FIXES}- ${commit}\n"
+              echo "- $commit" >> fixes.txt
             elif [[ $commit =~ ^docs?[:(] ]]; then
-              DOCS="${DOCS}- ${commit}\n"
+              echo "- $commit" >> docs.txt
             elif [[ $commit =~ ^chore[:(] ]]; then
-              CHORES="${CHORES}- ${commit}\n"
+              echo "- $commit" >> chores.txt
             elif [[ $commit =~ ^refactor[:(] ]]; then
-              REFACTORS="${REFACTORS}- ${commit}\n"
+              echo "- $commit" >> refactors.txt
             else
-              OTHERS="${OTHERS}- ${commit}\n"
+              echo "- $commit" >> others.txt
             fi
-          done <<< "$COMMITS"
+          done < commits.txt
 
           # Build release notes
           echo "## What's Changed" > release_notes.txt
           echo "" >> release_notes.txt
 
-          if [ -n "$FEATURES" ]; then
+          if [ -s features.txt ]; then
             echo "### ✨ Features" >> release_notes.txt
             echo "" >> release_notes.txt
-            echo -e "$FEATURES" >> release_notes.txt
+            cat features.txt >> release_notes.txt
+            echo "" >> release_notes.txt
           fi
 
-          if [ -n "$FIXES" ]; then
+          if [ -s fixes.txt ]; then
             echo "### 🐛 Bug Fixes" >> release_notes.txt
             echo "" >> release_notes.txt
-            echo -e "$FIXES" >> release_notes.txt
+            cat fixes.txt >> release_notes.txt
+            echo "" >> release_notes.txt
           fi
 
-          if [ -n "$REFACTORS" ]; then
+          if [ -s refactors.txt ]; then
             echo "### ♻️ Refactors" >> release_notes.txt
             echo "" >> release_notes.txt
-            echo -e "$REFACTORS" >> release_notes.txt
+            cat refactors.txt >> release_notes.txt
+            echo "" >> release_notes.txt
           fi
 
-          if [ -n "$DOCS" ]; then
+          if [ -s docs.txt ]; then
             echo "### 📚 Documentation" >> release_notes.txt
             echo "" >> release_notes.txt
-            echo -e "$DOCS" >> release_notes.txt
+            cat docs.txt >> release_notes.txt
+            echo "" >> release_notes.txt
           fi
 
-          if [ -n "$CHORES" ]; then
+          if [ -s chores.txt ]; then
             echo "### 🧹 Chores" >> release_notes.txt
             echo "" >> release_notes.txt
-            echo -e "$CHORES" >> release_notes.txt
+            cat chores.txt >> release_notes.txt
+            echo "" >> release_notes.txt
           fi
 
-          if [ -n "$OTHERS" ]; then
+          if [ -s others.txt ]; then
             echo "### 📦 Other Changes" >> release_notes.txt
             echo "" >> release_notes.txt
-            echo -e "$OTHERS" >> release_notes.txt
+            cat others.txt >> release_notes.txt
+            echo "" >> release_notes.txt
           fi
 
           echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV_TAG}...v${VERSION}" >> release_notes.txt
+
+          # Cleanup temp files
+          rm -f commits.txt features.txt fixes.txt docs.txt chores.txt refactors.txt others.txt
 
           echo "notes_file=release_notes.txt" >> $GITHUB_OUTPUT
 
