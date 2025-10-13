@@ -12,11 +12,12 @@ on:
         description: 'NPM tag (e.g., latest, beta, next)'
         required: true
         type: string
-        default: 'latest'
+        default: 'beta'
       version:
-        description: 'Version override (optional, e.g., 1.0.0)'
+        description: 'Version override (optional, e.g., 1.0.0, or "auto" to auto-increment)'
         required: false
         type: string
+        default: 'auto'
 
 jobs:
   release:
@@ -61,27 +62,67 @@ jobs:
       - name: Run tests
         run: bun run test
 
-      - name: Update version (if specified)
-        if: ${{ inputs.version != '' }}
+      - name: Determine version
+        id: determine_version
         working-directory: packages/uniwind
         run: |
-          echo "Updating version to ${{ inputs.version }}"
-          bun version --no-git-tag-version ${{ inputs.version }}
+          PACKAGE_NAME=$(cat package.json | grep '"name"' | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | xargs)
+          CURRENT_VERSION=$(cat package.json | grep '"version"' | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | xargs)
 
-      - name: Get package version
-        id: package_version
-        working-directory: packages/uniwind
-        run: |
-          VERSION=$(cat package.json | grep '"version"' | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | xargs)
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Package version: $VERSION"
+          VERSION_INPUT="${{ inputs.version }}"
+
+          if [ "$VERSION_INPUT" = "auto" ]; then
+            echo "Auto-increment mode enabled"
+
+            # Check if current version is already published
+            if npm view "$PACKAGE_NAME@$CURRENT_VERSION" version 2>/dev/null; then
+              echo "⚠️ Version $CURRENT_VERSION is already published, auto-incrementing..."
+
+              # Parse version (supports beta.X format)
+              if [[ $CURRENT_VERSION =~ ^(.+)-beta\.([0-9]+)$ ]]; then
+                BASE="${BASH_REMATCH[1]}"
+                BETA_NUM="${BASH_REMATCH[2]}"
+                NEW_BETA=$((BETA_NUM + 1))
+                NEW_VERSION="$BASE-beta.$NEW_BETA"
+                echo "Incrementing beta version: $CURRENT_VERSION -> $NEW_VERSION"
+              elif [[ $CURRENT_VERSION =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+                MAJOR="${BASH_REMATCH[1]}"
+                MINOR="${BASH_REMATCH[2]}"
+                PATCH="${BASH_REMATCH[3]}"
+                NEW_PATCH=$((PATCH + 1))
+                NEW_VERSION="$MAJOR.$MINOR.$NEW_PATCH"
+                echo "Incrementing patch version: $CURRENT_VERSION -> $NEW_VERSION"
+              else
+                echo "❌ Unable to parse version format: $CURRENT_VERSION"
+                exit 1
+              fi
+
+              # Update package.json
+              bun version --no-git-tag-version "$NEW_VERSION"
+              echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+              echo "version_changed=true" >> $GITHUB_OUTPUT
+            else
+              echo "✅ Version $CURRENT_VERSION is not yet published, using as-is"
+              echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+              echo "version_changed=false" >> $GITHUB_OUTPUT
+            fi
+          elif [ -n "$VERSION_INPUT" ]; then
+            echo "Using specified version: $VERSION_INPUT"
+            bun version --no-git-tag-version "$VERSION_INPUT"
+            echo "version=$VERSION_INPUT" >> $GITHUB_OUTPUT
+            echo "version_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "Using version from package.json: $CURRENT_VERSION"
+            echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+            echo "version_changed=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Check if version already published
         id: check_published
         working-directory: packages/uniwind
         run: |
           PACKAGE_NAME=$(cat package.json | grep '"name"' | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | xargs)
-          VERSION="${{ steps.package_version.outputs.version }}"
+          VERSION="${{ steps.determine_version.outputs.version }}"
 
           if npm view "$PACKAGE_NAME@$VERSION" version 2>/dev/null; then
             echo "published=true" >> $GITHUB_OUTPUT
@@ -94,37 +135,97 @@ jobs:
       - name: Generate release notes
         id: release_notes
         run: |
-          VERSION="${{ steps.package_version.outputs.version }}"
+          VERSION="${{ steps.determine_version.outputs.version }}"
           PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
 
-          # Generate release notes file
+          # Get commits
+          if [ -z "$PREV_TAG" ]; then
+            echo "No previous tag found, using all commits"
+            COMMITS=$(git log --pretty=format:"%s (%h)" --no-merges)
+          else
+            echo "Generating changelog from $PREV_TAG to HEAD"
+            COMMITS=$(git log $PREV_TAG..HEAD --pretty=format:"%s (%h)" --no-merges)
+          fi
+
+          # Categorize commits
+          FEATURES=""
+          FIXES=""
+          DOCS=""
+          CHORES=""
+          REFACTORS=""
+          OTHERS=""
+
+          while IFS= read -r commit; do
+            if [[ $commit =~ ^feat[:(] ]]; then
+              FEATURES="${FEATURES}- ${commit}\n"
+            elif [[ $commit =~ ^fix[:(] ]]; then
+              FIXES="${FIXES}- ${commit}\n"
+            elif [[ $commit =~ ^docs?[:(] ]]; then
+              DOCS="${DOCS}- ${commit}\n"
+            elif [[ $commit =~ ^chore[:(] ]]; then
+              CHORES="${CHORES}- ${commit}\n"
+            elif [[ $commit =~ ^refactor[:(] ]]; then
+              REFACTORS="${REFACTORS}- ${commit}\n"
+            else
+              OTHERS="${OTHERS}- ${commit}\n"
+            fi
+          done <<< "$COMMITS"
+
+          # Build release notes
           echo "## What's Changed" > release_notes.txt
           echo "" >> release_notes.txt
 
-          if [ -z "$PREV_TAG" ]; then
-            echo "No previous tag found, using all commits"
-            git log --pretty=format:"- %s (%h)" --no-merges >> release_notes.txt
-          else
-            echo "Generating changelog from $PREV_TAG to HEAD"
-            git log $PREV_TAG..HEAD --pretty=format:"- %s (%h)" --no-merges >> release_notes.txt
+          if [ -n "$FEATURES" ]; then
+            echo "### ✨ Features" >> release_notes.txt
+            echo "" >> release_notes.txt
+            echo -e "$FEATURES" >> release_notes.txt
           fi
 
-          echo "" >> release_notes.txt
+          if [ -n "$FIXES" ]; then
+            echo "### 🐛 Bug Fixes" >> release_notes.txt
+            echo "" >> release_notes.txt
+            echo -e "$FIXES" >> release_notes.txt
+          fi
+
+          if [ -n "$REFACTORS" ]; then
+            echo "### ♻️ Refactors" >> release_notes.txt
+            echo "" >> release_notes.txt
+            echo -e "$REFACTORS" >> release_notes.txt
+          fi
+
+          if [ -n "$DOCS" ]; then
+            echo "### 📚 Documentation" >> release_notes.txt
+            echo "" >> release_notes.txt
+            echo -e "$DOCS" >> release_notes.txt
+          fi
+
+          if [ -n "$CHORES" ]; then
+            echo "### 🧹 Chores" >> release_notes.txt
+            echo "" >> release_notes.txt
+            echo -e "$CHORES" >> release_notes.txt
+          fi
+
+          if [ -n "$OTHERS" ]; then
+            echo "### 📦 Other Changes" >> release_notes.txt
+            echo "" >> release_notes.txt
+            echo -e "$OTHERS" >> release_notes.txt
+          fi
+
           echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV_TAG}...v${VERSION}" >> release_notes.txt
 
           echo "notes_file=release_notes.txt" >> $GITHUB_OUTPUT
 
       - name: Commit version bump (if version was updated)
-        if: ${{ inputs.version != '' && !inputs.dry_run }}
+        if: ${{ steps.determine_version.outputs.version_changed == 'true' && !inputs.dry_run }}
         run: |
           git add packages/uniwind/package.json
-          git commit -m "chore: bump version to ${{ steps.package_version.outputs.version }}" || echo "No changes to commit"
+          git commit -m "chore: bump version to ${{ steps.determine_version.outputs.version }}" || echo "No changes to commit"
           git push origin main
 
       - name: Create Git tag
         if: ${{ !inputs.dry_run }}
         run: |
-          VERSION="${{ steps.package_version.outputs.version }}"
+          VERSION="${{ steps.determine_version.outputs.version }}"
           git tag -a "v$VERSION" -m "Release v$VERSION"
           git push origin "v$VERSION"
 
@@ -133,7 +234,7 @@ jobs:
         working-directory: packages/uniwind
         run: |
           echo "🔍 DRY RUN MODE - Would publish with:"
-          echo "  Version: ${{ steps.package_version.outputs.version }}"
+          echo "  Version: ${{ steps.determine_version.outputs.version }}"
           echo "  Tag: ${{ inputs.npm_tag }}"
           echo "  Already published: ${{ steps.check_published.outputs.published }}"
           npm pack --dry-run
@@ -153,8 +254,8 @@ jobs:
         if: ${{ inputs.dry_run }}
         run: |
           echo "🔍 DRY RUN MODE - Would create GitHub release:"
-          echo "  Tag: v${{ steps.package_version.outputs.version }}"
-          echo "  Title: Release v${{ steps.package_version.outputs.version }}"
+          echo "  Tag: v${{ steps.determine_version.outputs.version }}"
+          echo "  Title: Release v${{ steps.determine_version.outputs.version }}"
           echo ""
           echo "Release notes:"
           cat ${{ steps.release_notes.outputs.notes_file }}
@@ -164,7 +265,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          VERSION="${{ steps.package_version.outputs.version }}"
+          VERSION="${{ steps.determine_version.outputs.version }}"
           gh release create "v$VERSION" \
             --title "Release v$VERSION" \
             --notes-file ${{ steps.release_notes.outputs.notes_file }} \
@@ -174,7 +275,7 @@ jobs:
         run: |
           echo "## Release Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **Version:** ${{ steps.package_version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version:** ${{ steps.determine_version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
           echo "- **NPM Tag:** ${{ inputs.npm_tag }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Dry Run:** ${{ inputs.dry_run }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Already Published:** ${{ steps.check_published.outputs.published }}" >> $GITHUB_STEP_SUMMARY
@@ -188,7 +289,7 @@ jobs:
             else
               echo "### ✅ Package published successfully!" >> $GITHUB_STEP_SUMMARY
               echo "" >> $GITHUB_STEP_SUMMARY
-              echo "- NPM: https://www.npmjs.com/package/uniwind/v/${{ steps.package_version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-              echo "- GitHub: https://github.com/${{ github.repository }}/releases/tag/v${{ steps.package_version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+              echo "- NPM: https://www.npmjs.com/package/uniwind/v/${{ steps.determine_version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+              echo "- GitHub: https://github.com/${{ github.repository }}/releases/tag/v${{ steps.determine_version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
             fi
           fi
