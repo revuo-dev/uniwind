@@ -1,5 +1,6 @@
 {
     "name": "uniwind-monorepo",
+    "private": true,
     "scripts": {
         "prepare": "husky",
         "build": "turbo build",
