@@ -181,7 +181,18 @@ export class RN {
     cssToRN(property: string, value: any) {
         const transformedProperty = property.startsWith('--')
             ? property
-            : toCamelCase(property)
+            : pipe(property)(
+                toCamelCase,
+                x => {
+                    if (x.includes('padding') || x.includes('margin')) {
+                        return x
+                            .replace('Inline', 'Horizontal')
+                            .replace('Block', 'Vertical')
+                    }
+
+                    return x
+                },
+            )
 
         const rn = this.transformProperty(
             transformedProperty,
@@ -202,18 +213,7 @@ export class RN {
             const propertyEnd = property.includes('border')
                 ? property.split('border').at(-1) ?? ''
                 : ''
-            const transformedProperty = pipe(property)(
-                x => x.replace(propertyEnd, ''),
-                x => {
-                    if (x.includes('padding') || x.includes('margin')) {
-                        return x
-                            .replace('Inline', 'Horizontal')
-                            .replace('Block', 'Vertical')
-                    }
-
-                    return x
-                },
-            )
+            const transformedProperty = property.replace(propertyEnd, '')
 
             if (properties.every(property => ['row', 'column'].includes(property))) {
                 return {
