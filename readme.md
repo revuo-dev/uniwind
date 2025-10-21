@@ -1,4 +1,4 @@
-[<img alt="uniwind" src="assets/banner.png">](https://uniwind.dev/)
+[<img alt="uniwind" src="assets/banner2.png">](https://uniwind.dev/)
 
 <div align="center">
     <p align="center">
