@@ -20,10 +20,11 @@ const getPlatformFromVirtualPath = (path: string) => {
 
 const platforms = [Platform.iOS, Platform.Android, Platform.Web]
 
-export const withUniwindConfig = async (
+export const withUniwindConfig = (
     config: MetroConfig,
     uniwindConfig: UniwindConfig,
-): Promise<MetroConfig> => {
+) =>
+async (): Promise<MetroConfig> => {
     if (!fs.existsSync(cacheDir)) {
         fs.mkdirSync(cacheDir)
     }
