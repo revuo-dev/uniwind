@@ -63,8 +63,7 @@ export type DeclarationValues =
     | AbsoluteFontWeight
 
 export type ProcessMetaValues = {
-    propertyName?: string
-    className?: string
+    className?: string | null
 }
 
 export type StyleSheetTemplate = {
