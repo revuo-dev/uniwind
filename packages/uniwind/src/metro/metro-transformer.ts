@@ -1,12 +1,13 @@
 import { Scanner } from '@tailwindcss/oxide'
 import fs from 'fs'
-import { JsTransformerConfig, JsTransformOptions } from 'metro-transform-worker'
+import type { JsTransformerConfig, JsTransformOptions, TransformResponse } from 'metro-transform-worker'
 import path from 'path'
 import { name } from '../../package.json'
 import { compileVirtual } from './compileVirtual'
 import { getSources } from './getSources'
 import { injectThemes } from './injectThemes'
 import { Platform, UniwindConfig } from './types'
+import { areSetsEqual } from './utils'
 
 let worker: typeof import('metro-transform-worker')
 
@@ -14,6 +15,12 @@ try {
     worker = require('@expo/metro-config/build/transform-worker/transform-worker.js')
 } catch {
     worker = require('metro-transform-worker')
+}
+
+const uniwindCache = {
+    css: '',
+    candidates: new Set<string>(),
+    cachedTransforms: new Map<Platform, TransformResponse>(),
 }
 
 export const transform = async (
@@ -50,16 +57,27 @@ export const transform = async (
     })
     const css = fs.readFileSync(filePath, 'utf-8')
     const sources = getSources(css, path.dirname(cssPath))
+    const platform = options.platform as Platform
+    const cached = uniwindCache.cachedTransforms.get(platform)
     const candidates = new Scanner({ sources }).scan()
+    const candidatesSet = new Set(candidates)
+
+    if (cached && uniwindCache.css === css && areSetsEqual(uniwindCache.candidates, candidatesSet)) {
+        return cached
+    }
+
+    uniwindCache.css = css
+    uniwindCache.candidates = candidatesSet
+
     const virtualCode = await compileVirtual({
         css,
-        platform: options.platform as Platform,
+        platform,
         themes: config.uniwind.themes,
         polyfills: config.uniwind.polyfills,
         candidates,
         cssPath,
     })
-    const isWeb = options.platform === Platform.Web
+    const isWeb = platform === Platform.Web
 
     data = Buffer.from(
         isWeb
@@ -80,6 +98,7 @@ export const transform = async (
         options,
     )
 
+    uniwindCache.cachedTransforms.set(platform, transform)
     transform.output[0].data.css = {
         skipCache: true,
         code: '',
