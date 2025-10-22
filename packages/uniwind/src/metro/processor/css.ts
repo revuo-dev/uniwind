@@ -397,6 +397,12 @@ export class CSS {
             }
         }
 
+        if ('keyword' in declarationValue) {
+            return declarationValue.keyword === 'auto' || declarationValue.keyword === 'pointer'
+                ? declarationValue.keyword
+                : 'auto'
+        }
+
         this.logUnsupported(`Unsupported value - ${JSON.stringify(declarationValue)}`)
 
         return ''
