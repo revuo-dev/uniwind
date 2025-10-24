@@ -38,8 +38,8 @@ body:
          - Issue is not related to your app that has multiple dependencies
          - Can isolate the problem
          - Allow us to reproduce in minutes
-      validations:
-        required: true
+    validations:
+      required: true
 
   - type: input
     id: uniwind-version
