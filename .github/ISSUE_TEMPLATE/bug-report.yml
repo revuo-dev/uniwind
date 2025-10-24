@@ -32,12 +32,13 @@ body:
     id: repro
     attributes:
       label: Snack or Repository Link
-      description: Provide a link to a GitHub repository or Snack that reproduces the issue.
-      placeholder: |
+      description: |
+        Provide a link to a GitHub repository or Snack that reproduces the issue.
         Repro will confirm that:
          - Issue is not related to your app that has multiple dependencies
          - Can isolate the problem
          - Allow us to reproduce in minutes
+      placeholder: https://github.com
     validations:
       required: true
 
