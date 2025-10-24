@@ -255,8 +255,3 @@
 
 @custom-variant light (&:where(.light, .light *));
 @custom-variant dark (&:where(.dark, .dark *));
-@custom-variant premium (&:where(.premium, .premium *));
-
-@theme {
-    --color-background: unset;
-}
