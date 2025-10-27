@@ -13,7 +13,8 @@
         "precommit": "turbo precommit",
         "test": "turbo test",
         "format": "dprint fmt",
-        "circular:check": "turbo circular:check"
+        "circular:check": "turbo circular:check",
+        "postinstall": "git update-index --assume-unchanged packages/uniwind/uniwind.css"
     },
     "workspaces": [
         "packages/*",
