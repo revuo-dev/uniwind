@@ -278,6 +278,10 @@ export class CSS {
         }
 
         if (Array.isArray(declarationValue)) {
+            if (declarationValue.length === 1) {
+                return this.processValue(declarationValue[0]!)
+            }
+
             return this.addComaBetweenTokens(declarationValue).reduce<string | number>((acc, value, index, array) => {
                 if (typeof value === 'object') {
                     const nextValue = array.at(index + 1)

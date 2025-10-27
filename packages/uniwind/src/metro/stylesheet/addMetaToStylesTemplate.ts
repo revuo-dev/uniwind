@@ -3,6 +3,18 @@ import { ProcessorBuilder } from '../processor'
 import { Platform, StyleSheetTemplate } from '../types'
 import { isDefined, toCamelCase } from '../utils'
 
+const simpleSerialize = (value: any): string => {
+    if (Array.isArray(value)) {
+        return [
+            '[',
+            value.map(simpleSerialize).join(', '),
+            ']',
+        ].join('')
+    }
+
+    return JSON.stringify(value)
+}
+
 export const addMetaToStylesTemplate = (Processor: ProcessorBuilder, currentPlatform: Platform) => {
     const stylesheetsEntries = Object.entries(Processor.stylesheets as StyleSheetTemplate)
         .map(([className, stylesPerMediaQuery]) => {
@@ -26,7 +38,7 @@ export const addMetaToStylesTemplate = (Processor: ProcessorBuilder, currentPlat
 
                 const entries = Object.entries(rest)
                     .flatMap(([property, value]) => Processor.RN.cssToRN(property, value))
-                    .map(([property, value]) => [property, `function() { return ${value} }`])
+                    .map(([property, value]) => [property, `function() { return ${simpleSerialize(value)} }`])
 
                 if (platform && platform !== Platform.Native && platform !== currentPlatform) {
                     return null
