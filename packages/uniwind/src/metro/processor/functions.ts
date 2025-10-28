@@ -1,6 +1,6 @@
 import { CalcFor_DimensionPercentageFor_LengthValue, CalcFor_Length, CssColor, Function as FunctionType } from 'lightningcss'
 import { Logger } from '../logger'
-import { percentageToFloat, pipe } from '../utils'
+import { pipe } from '../utils'
 import type { ProcessorBuilder } from './processor'
 
 export class Functions {
@@ -54,7 +54,7 @@ export class Functions {
         }
 
         if (fn.name === 'max') {
-            return `Math.max( ${this.Processor.CSS.processValue(fn.arguments)} )`
+            return `Math.max(${this.Processor.CSS.processValue(fn.arguments)})`
         }
 
         if (fn.name === 'linear-gradient') {
@@ -102,7 +102,7 @@ export class Functions {
         }
 
         if (['skewX', 'skewY'].includes(fn.name)) {
-            return `${fn.name}(${this.Processor.CSS.processValue(fn.arguments)})`
+            return `"${fn.name}(${this.Processor.CSS.processValue(fn.arguments)})"`
         }
 
         if (fn.name === 'hairlineWidth') {
@@ -110,11 +110,11 @@ export class Functions {
         }
 
         if (fn.name === 'pixelRatio') {
-            return `rt.pixelRatio( ${this.Processor.CSS.processValue(fn.arguments)} )`
+            return `rt.pixelRatio(${this.Processor.CSS.processValue(fn.arguments)})`
         }
 
         if (fn.name === 'fontScale') {
-            return `rt.fontScale( ${this.Processor.CSS.processValue(fn.arguments)} )`
+            return `rt.fontScale(${this.Processor.CSS.processValue(fn.arguments)})`
         }
 
         this.logger.error(`Unsupported function - ${fn.name}`)
@@ -131,17 +131,21 @@ export class Functions {
             | CalcFor_Length,
     ) {
         if (!Array.isArray(value)) {
-            return `Math.${name} ( ${this.processCalc(value)} )`
+            return `Math.${name}(${this.processCalc(value)})`
         }
 
         const values = value.map(x => this.processCalc(x)).join(' , ')
 
-        return `Math.${name}( ${values} )`
+        return `Math.${name}(${values})`
     }
 
     private tryEval(value: string) {
         // Match units like %, deg, rad, grad, turn that are not preceded by letters or hyphens
-        const units = Array.from(value.match(/(?<![A-Za-z-])(?:%|deg|rad|grad|turn)(?=\s|$)/g) ?? [])
+        const units = Array.from(
+            value
+                .replace(/"/g, '')
+                .match(/(?<![A-Za-z-])(?:%|deg|rad|grad|turn)(?=\s|$)/g) ?? [],
+        )
 
         if (units.length === 0) {
             return value
@@ -156,7 +160,9 @@ export class Functions {
         const unit = units.at(0) ?? ''
 
         try {
-            const numericValue = value.replace(new RegExp(unit, 'g'), '')
+            const numericValue = value
+                .replace(/"/g, '')
+                .replace(new RegExp(unit, 'g'), '')
 
             // eslint-disable-next-line @typescript-eslint/no-implied-eval, no-new-func
             return new Function(`return ${numericValue} + '${unit}'`)()
@@ -168,25 +174,16 @@ export class Functions {
     }
 
     private processColorMix(fn: FunctionType) {
-        const tokens = pipe(this.Processor.CSS.processValue(fn.arguments))(
-            String,
-            x => x.replace(/\](?!\s*[+-/*])(?!\s)/g, '] '),
-            x => x.replace(/,/g, ''),
-            x => x.split(' '),
-        )
+        const tokens = fn.arguments
+            .map(arg =>
+                pipe(arg)(
+                    x => this.Processor.CSS.processValue(x),
+                    String,
+                    x => x.trim(),
+                )
+            )
+            .filter(token => !['', ',', 'in', 'srgb', 'rgb', 'hsl', 'hwb', 'lab', 'lch', 'oklab', 'oklch'].includes(token.replace(/"/g, '')))
 
-        const color = tokens.find(token => token.startsWith('#') || token.startsWith('this[`--color-'))
-        const percentage = percentageToFloat(tokens.find(token => token.endsWith('%')) ?? '50%')
-        const mixColor = tokens.reverse().find(token => token.startsWith('#') || token.startsWith('this[`--color-'))
-
-        return [
-            'rt.colorMix( ',
-            color,
-            ', ',
-            mixColor,
-            ', ',
-            percentage,
-            ' )',
-        ].join('')
+        return `rt.colorMix(${tokens.join(', ')})`
     }
 }

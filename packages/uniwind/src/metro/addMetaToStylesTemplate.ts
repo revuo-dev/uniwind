@@ -1,19 +1,7 @@
-import { StyleDependency } from '../../types'
-import { ProcessorBuilder } from '../processor'
-import { Platform, StyleSheetTemplate } from '../types'
-import { isDefined, toCamelCase } from '../utils'
-
-const simpleSerialize = (value: any): string => {
-    if (Array.isArray(value)) {
-        return [
-            '[',
-            value.map(simpleSerialize).join(', '),
-            ']',
-        ].join('')
-    }
-
-    return JSON.stringify(value)
-}
+import { StyleDependency } from '../types'
+import { ProcessorBuilder } from './processor'
+import { Platform, StyleSheetTemplate } from './types'
+import { isDefined, serialize, toCamelCase } from './utils'
 
 const extractVarsFromString = (value: string) => {
     const thisIndexes = [...value.matchAll(/this\[/g)].map(m => m.index)
@@ -25,6 +13,18 @@ const extractVarsFromString = (value: string) => {
 
         return varName.replace(/[`"\\]/g, '')
     })
+}
+
+const makeSafeForSerialization = (value: any) => {
+    if (value === null) {
+        return null
+    }
+
+    if (typeof value === 'string') {
+        return `"${value}"`
+    }
+
+    return value
 }
 
 export const addMetaToStylesTemplate = (Processor: ProcessorBuilder, currentPlatform: Platform) => {
@@ -50,7 +50,7 @@ export const addMetaToStylesTemplate = (Processor: ProcessorBuilder, currentPlat
 
                 const entries = Object.entries(rest)
                     .flatMap(([property, value]) => Processor.RN.cssToRN(property, value))
-                    .map(([property, value]) => [property, `function() { return ${simpleSerialize(value)} }`])
+                    .map(([property, value]) => [`"${property}"`, `function() { return ${serialize(value)} }`])
 
                 if (platform && platform !== Platform.Native && platform !== currentPlatform) {
                     return null
@@ -103,18 +103,20 @@ export const addMetaToStylesTemplate = (Processor: ProcessorBuilder, currentPlat
                     entries,
                     minWidth,
                     maxWidth,
-                    theme,
-                    orientation,
+                    theme: makeSafeForSerialization(theme),
+                    orientation: makeSafeForSerialization(orientation),
                     rtl,
-                    colorScheme,
+                    colorScheme: makeSafeForSerialization(colorScheme),
                     native: platform !== null,
                     dependencies,
                     index,
-                    className,
+                    className: makeSafeForSerialization(className),
                     active,
                     focus,
                     disabled,
-                    importantProperties: importantProperties?.map(property => property.startsWith('--') ? property : toCamelCase) ?? [],
+                    importantProperties: importantProperties
+                        ?.map(property => property.startsWith('--') ? property : toCamelCase)
+                        .map(makeSafeForSerialization) ?? [],
                     complexity: [
                         minWidth !== 0,
                         theme !== null,
