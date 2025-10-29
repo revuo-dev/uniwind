@@ -1,5 +1,5 @@
 import { Logger } from '../logger'
-import { isNumber, isValidJSValue, pipe, roundToPrecision, smartSplit } from './common'
+import { addMissingSpaces, isNumber, isValidJSValue, pipe, roundToPrecision, smartSplit } from './common'
 
 const parseStringValue = (value: string) => {
     if (isValidJSValue(value)) {
@@ -10,7 +10,7 @@ const parseStringValue = (value: string) => {
         return value
     }
 
-    const tokens = smartSplit(value)
+    const tokens = smartSplit(addMissingSpaces(value))
     const parsedTokens = tokens.map(token => {
         // String literals
         if (token.startsWith('"')) {

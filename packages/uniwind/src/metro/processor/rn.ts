@@ -9,7 +9,11 @@ const cssToRNMap: Record<string, (value: any) => Record<string, any>> = {
     },
     transitionProperty: (value: string) => {
         return {
-            transitionProperty: value.split(',').map(toCamelCase),
+            transitionProperty: value
+                .replace(/"/g, '')
+                .split(',')
+                .filter(token => token !== '' && !token.startsWith('--'))
+                .map(token => `"${toCamelCase(token)}"`),
         }
     },
     flex: (value: any) => {
