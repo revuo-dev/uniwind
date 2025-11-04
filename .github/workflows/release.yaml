@@ -12,7 +12,7 @@ on:
         description: 'NPM tag (e.g., latest, beta, next)'
         required: true
         type: string
-        default: 'beta'
+        default: 'latest'
       version:
         description: 'Version override (optional, e.g., 1.0.0, or "auto" to auto-increment)'
         required: false
