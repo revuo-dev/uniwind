@@ -59,7 +59,7 @@ class UniwindConfigBuilder {
                 this.emitThemeChange()
             }
 
-            Appearance.setColorScheme(isAdaptiveTheme ? this.#currentTheme as ColorScheme : undefined)
+            Appearance.setColorScheme(undefined)
 
             return
         }

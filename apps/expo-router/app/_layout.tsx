@@ -1,19 +1,17 @@
 import { ThemeSwitchButton } from '@/components/theme-switch-button'
 import '@/globals.css'
-import { getNativeColorScheme, getNavigationTheme, getStoredThemeSync } from '@/utils/theme'
+import { getNavigationTheme, getStoredThemeSync } from '@/utils/theme'
 import { isLiquidGlassAvailable } from 'expo-glass-effect'
 import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import React from 'react'
-import { Appearance, Platform } from 'react-native'
+import { Platform } from 'react-native'
 import { Uniwind, useUniwind } from 'uniwind'
 
 // Set initial theme based on user preference
 const initialTheme = getStoredThemeSync()
-Uniwind.setTheme(initialTheme ?? 'system')
 
-// Set React Native Appearance
-Appearance.setColorScheme(getNativeColorScheme(initialTheme ?? 'system'))
+Uniwind.setTheme(initialTheme ?? 'system')
 
 const sections = [
     { name: 'Aspect Ratio', path: 'sections/aspect-ratio' },
