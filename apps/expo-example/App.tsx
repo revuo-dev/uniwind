@@ -1,6 +1,6 @@
 import './global.css'
 import React from 'react'
-import { Image, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
 const TailwindTestPage = () => {
     return (

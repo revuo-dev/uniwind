@@ -49,6 +49,7 @@ class UniwindConfigBuilder {
     setTheme(theme: ThemeName | typeof SYSTEM_THEME) {
         const prevTheme = this.#currentTheme
         const prevHasAdaptiveThemes = this.#hasAdaptiveThemes
+        const isAdaptiveTheme = ['light', 'dark'].includes(theme)
 
         if (theme === SYSTEM_THEME) {
             this.#hasAdaptiveThemes = true
@@ -57,6 +58,8 @@ class UniwindConfigBuilder {
             if (prevTheme !== this.#currentTheme || prevHasAdaptiveThemes !== this.#hasAdaptiveThemes) {
                 this.emitThemeChange()
             }
+
+            Appearance.setColorScheme(isAdaptiveTheme ? this.#currentTheme as ColorScheme : undefined)
 
             return
         }
@@ -71,6 +74,8 @@ class UniwindConfigBuilder {
         if (prevTheme !== this.#currentTheme || prevHasAdaptiveThemes !== this.#hasAdaptiveThemes) {
             this.emitThemeChange()
         }
+
+        Appearance.setColorScheme(isAdaptiveTheme ? this.#currentTheme as ColorScheme : undefined)
     }
 
     private emitThemeChange() {
