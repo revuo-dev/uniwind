@@ -33,9 +33,6 @@ export const useStoredTheme = () => {
             // Set the theme
             Uniwind.setTheme(t)
 
-            // Set the native color scheme
-            Appearance.setColorScheme(getNativeColorScheme(t))
-
             // Store the theme
             setStoredTheme(t)
         },
