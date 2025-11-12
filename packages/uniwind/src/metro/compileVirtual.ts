@@ -15,9 +15,10 @@ type CompileVirtualConfig = {
     themes: Array<string>
     polyfills: Polyfills | undefined
     debug: boolean | undefined
+    candidates?: Array<string>
 }
 
-export const compileVirtual = async ({ css, cssPath, platform, themes, polyfills, debug }: CompileVirtualConfig) => {
+export const compileVirtual = async ({ css, cssPath, platform, themes, polyfills, debug, candidates }: CompileVirtualConfig) => {
     const compiler = await compile(css, {
         base: path.dirname(cssPath),
         onDependency: () => void 0,
@@ -32,7 +33,7 @@ export const compileVirtual = async ({ css, cssPath, platform, themes, polyfills
             },
         ],
     })
-    const tailwindCSS = compiler.build(scanner.scan())
+    const tailwindCSS = compiler.build(candidates ?? scanner.scan())
 
     if (platform === Platform.Web) {
         return polyfillWeb(tailwindCSS)

@@ -13,6 +13,7 @@ export const getStyleSheetsFromCandidates = async <T extends string>(...candidat
     const virtualJS = await compileVirtual({
         css,
         candidates,
+        debug: true,
         platform: Platform.iOS,
         cssPath: testCSSPath,
         polyfills: {},

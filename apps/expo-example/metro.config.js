@@ -18,4 +18,5 @@ module.exports = withUniwindConfig(config, {
     cssEntryFile: 'global.css',
     extraThemes: ['premium'],
     polyfills: { rem: 14 },
+    debug: true,
 })
