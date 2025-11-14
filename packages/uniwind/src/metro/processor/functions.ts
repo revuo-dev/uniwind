@@ -117,6 +117,10 @@ export class Functions {
             return `rt.fontScale(${this.Processor.CSS.processValue(fn.arguments)})`
         }
 
+        if (fn.name === 'drop-shadow') {
+            return undefined
+        }
+
         this.logger.error(`Unsupported function - ${fn.name}`)
 
         return fn.name
