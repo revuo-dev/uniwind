@@ -161,6 +161,12 @@ export class Functions {
             return value
         }
 
+        if (units.includes('%') && value.includes('+')) {
+            this.logger.error(`Invalid calc, you can't mix % with other units`)
+
+            return value
+        }
+
         const unit = units.at(0) ?? ''
 
         try {
