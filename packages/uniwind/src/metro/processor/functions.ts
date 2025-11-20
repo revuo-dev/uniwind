@@ -22,7 +22,7 @@ export class Functions {
             case 'number':
                 return String(calc.value)
             default:
-                this.logger.error(`Unsupported calc type - ${calc.type}`)
+                this.logger.warn(`Unsupported calc type - ${calc.type}`)
 
                 return ''
         }
@@ -30,7 +30,7 @@ export class Functions {
 
     processFunction(fn: string | FunctionType) {
         if (typeof fn !== 'object') {
-            this.logger.error(`Unsupported function - ${fn}`)
+            this.logger.warn(`Unsupported function - ${fn}`)
 
             return fn
         }
@@ -121,7 +121,7 @@ export class Functions {
             return undefined
         }
 
-        this.logger.error(`Unsupported function - ${fn.name}`)
+        this.logger.warn(`Unsupported function - ${fn.name}`)
 
         return fn.name
     }

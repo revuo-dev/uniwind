@@ -108,7 +108,7 @@ export const serializeJSObject = (obj: Record<string, any>, serializer: (key: st
         // eslint-disable-next-line @typescript-eslint/no-implied-eval, no-new-func
         new Function(`function validateJS() { const obj = ({ ${serializedObject} }) }`)
     } catch {
-        Logger.error('Failed to create virtual js')
+        Logger.error('Failed to serialize javascript object')
         return ''
     }
 
