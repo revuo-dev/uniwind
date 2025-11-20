@@ -102,7 +102,7 @@ export const generateCSSForThemes = async (themes: Array<string>, input: string)
         Object.entries(themesVariables).forEach(([checkedTheme, checkedVariables]) => {
             variables.forEach(variable => {
                 if (!checkedVariables.has(variable)) {
-                    Logger.warn(`Theme ${checkedTheme} is missing variable ${variable}`)
+                    Logger.error(`Theme ${checkedTheme} is missing variable ${variable}`)
                     hasErrors = true
                 }
             })
@@ -110,7 +110,7 @@ export const generateCSSForThemes = async (themes: Array<string>, input: string)
     })
 
     if (hasErrors) {
-        Logger.warn('All themes must have the same variables')
+        Logger.error('All themes must have the same variables')
     }
 
     const variablesCSS = hasVariables
