@@ -43,7 +43,7 @@ export const smartSplit = (str: string, separator = ' ' as string | RegExp) => {
 export const addMissingSpaces = (str: string) =>
     pipe(str)(
         x => x.trim(),
-        x => x.replace(/]this/g, '] this'),
+        x => x.replace(/([^ {])this/g, '$1 this'),
         x => x.replace(/\](?=\d)/g, '] '),
         x => x.replace(/\)(?=\S)/g, ') '),
         x => x.replace(/(?<!^)(?<!\s)"(?=\d)/g, '" '),

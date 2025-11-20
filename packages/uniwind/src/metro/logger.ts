@@ -19,10 +19,6 @@ export class Logger {
     }
 
     static error(message: string, meta = '') {
-        if (!Logger.debug) {
-            return
-        }
-
         console.log(`${red}Uniwind Error ${meta}- ${message}${reset}`)
     }
 

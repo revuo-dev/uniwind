@@ -23,4 +23,5 @@ config.resolver.nodeModulesPaths = [
 module.exports = withUniwindConfig(config, {
     cssEntryFile: './globals.css',
     extraThemes: ['sepia', 'bubblegum'],
+    debug: true,
 })

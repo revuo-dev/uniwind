@@ -519,7 +519,7 @@ export class CSS {
     }
 
     private logUnsupported(message: string) {
-        this.logger.error(
+        this.logger.warn(
             [
                 message,
                 this.Processor.meta.className !== undefined ? `for className ${this.Processor.meta.className}` : null,

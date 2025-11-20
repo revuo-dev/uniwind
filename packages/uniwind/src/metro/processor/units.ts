@@ -25,7 +25,7 @@ export class Units {
                 case 'em':
                     return `this[\`--uniwind-em\`] * ${length.value}`
                 default:
-                    this.logger.error(`Unsupported unit - ${length.unit}`)
+                    this.logger.warn(`Unsupported unit - ${length.unit}`)
 
                     return length.value
             }
@@ -43,7 +43,7 @@ export class Units {
                 case 'percentage':
                     return `${length.value * 100}%`
                 default:
-                    this.logger.error(`Unsupported length type - ${length.type}`)
+                    this.logger.warn(`Unsupported length type - ${length.type}`)
 
                     return length.value
             }
